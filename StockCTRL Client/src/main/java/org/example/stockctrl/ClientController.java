@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class HelloController {
+public class ClientController {
 
     @FXML
     private Label welcomeText;
@@ -18,21 +18,21 @@ public class HelloController {
 
     @FXML
     public void switchSceneToMainViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(HelloApplication.class.getResource("main-view.fxml"));
+        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("main-view.fxml"));
         Scene scene = new Scene(main.load());
         Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
     }
     @FXML
     public void switchSceneToStartViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(HelloApplication.class.getResource("start-view.fxml"));
+        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
         Scene scene = new Scene(main.load());
         Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
     }
     @FXML
     public void switchSceneToProductViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(HelloApplication.class.getResource("products-view.fxml"));
+        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
         Scene scene = new Scene(main.load());
         Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
