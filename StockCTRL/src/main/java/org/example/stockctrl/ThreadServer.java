@@ -7,24 +7,24 @@ import java.net.Socket;
 import java.net.SocketException;
 
 public class ThreadServer {
-    private Socket socket;
+    private final Socket socket;
 
     public ThreadServer(Socket socket) {
         this.socket = socket;
     }
 
 
-    public void run( Socket clientSocket) {
+    public void run(Socket clientSocket) {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            boolean ok =true;
-            System.out.println("-- Server connected with client --" + clientSocket.getInetAddress() );
-            while(ok) {
+            boolean ok = true;
+            System.out.println("-- Server connected with client --" + clientSocket.getInetAddress());
+            while (ok) {
 
-                    String data = br.readLine();
-                    JSONObject json = new JSONObject(data);
-                    System.out.println("I order a data: " + json.toString());
+                String data = br.readLine();
+                JSONObject json = new JSONObject(data);
+                System.out.println("I order a data: " + json.toString());
 
 //                String dane = br.readLine();
 //                JSONObject json = new JSONObject(dane);

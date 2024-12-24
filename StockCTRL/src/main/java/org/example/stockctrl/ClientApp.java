@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Scanner;
 
 
-
 public class ClientApp extends Application {
 
     private static boolean isClientRunning = true;
@@ -34,15 +33,17 @@ public class ClientApp extends Application {
         stage.setScene(scene);
         stage.show();
 
-        stage.setOnCloseRequest(event ->{
+        stage.setOnCloseRequest(event -> {
             isClientRunning = false;
+            System.out.println("-- Client close --");
 
         });
 
         new Thread(ClientApp::startClient).start();
     }
 
-    public static void startClient(){
+
+    public static void startClient() {
         System.out.println("-- Client is started --");
         try {
             Socket socket = new Socket("localhost", 8080);
@@ -50,24 +51,17 @@ public class ClientApp extends Application {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             Scanner scanner = new Scanner(System.in);
 
-            System.out.println("-- Client " + socket.getInetAddress() +" connected with server --");
+            System.out.println("-- Client " + socket.getInetAddress() + " connected with server --");
 
 
-            while(isClientRunning) {
-                if(infoJson.optBoolean("toSend")){
-
-                    JSONObject jsonToSend = new JSONObject();
-                    jsonToSend.put("operation", infoJson.optString("operation"));
-                    jsonToSend.put("id", infoJson.optJSONArray("id"));
-
-                    System.out.println("Client send data: "+ jsonToSend);
-
-                    bw.write(jsonToSend.toString());
-                    bw.newLine();
-                    bw.flush();
-
-
-                    infoJson.put("toSend", false);
+            while (isClientRunning) {
+                if (infoJson.optBoolean("toSend")) {
+                    if (Objects.equals(infoJson.optString("operation"), "changeUserDetails")) {
+                        sendToServerChangeUserDetails(bw);
+                    }
+                    if (Objects.equals(infoJson.optString("operation"), "buy")) {
+                        sendToServerBuy(bw);
+                    }
                 }
 
 //                System.out.println("Podaj liczbe ");
@@ -83,16 +77,55 @@ public class ClientApp extends Application {
 
             }
 
-        }catch (ConnectException e){
+        } catch (ConnectException e) {
             System.out.println("-- Cannon connect with server --");
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public static void sendToServerBuy(BufferedWriter bw) {
+
+        JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("operation", infoJson.optString("operation"));
+        jsonToSend.put("id", infoJson.optJSONArray("id"));
+
+        System.out.println("Client send data: " + jsonToSend);
+
+
+        try {
+            bw.write(jsonToSend.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        infoJson.put("toSend", false);
+    }
+
+    public static void sendToServerChangeUserDetails(BufferedWriter bw) {
+
+        JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("operation", infoJson.optString("operation"));
+        jsonToSend.put("userDetails", infoJson.optJSONObject("userDetails"));
+
+        System.out.println("Client send data: " + jsonToSend);
+
+        try {
+            bw.write(jsonToSend.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        infoJson.put("toSend", false);
+    }
+
 
     public static void main(String[] args) {
-        infoJson.put("toSend",false);
+        infoJson.put("toSend", false);
         launch();
 
     }
