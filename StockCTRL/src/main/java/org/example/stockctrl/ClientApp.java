@@ -4,6 +4,7 @@ package org.example.stockctrl;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import org.json.JSONObject;
@@ -19,9 +20,15 @@ public class ClientApp extends Application {
 
     private static boolean isClientRunning = true;
     private static JSONObject infoJson = new JSONObject();
+    private static JSONObject controllerInfo = new JSONObject();
 
     public static void controllerToClient(JSONObject json) {
         infoJson = json;
+    }
+
+    public static JSONObject ClientToController(){
+
+        return infoJson;
     }
 
 
@@ -29,8 +36,11 @@ public class ClientApp extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/icon-warehouse.png")));
+        stage.getIcons().add(image);
         stage.setTitle("StockCTRL Client");
         stage.setScene(scene);
+
         stage.show();
 
         stage.setOnCloseRequest(event -> {
@@ -62,6 +72,9 @@ public class ClientApp extends Application {
                     if (Objects.equals(infoJson.optString("operation"), "buy")) {
                         sendToServerBuy(bw);
                     }
+                    if (Objects.equals(infoJson.optString("operation"), "giveProductsList")) {
+                        sendToServerInquiryProductsList(bw, br);
+                    }
                 }
 
 //                System.out.println("Podaj liczbe ");
@@ -90,7 +103,7 @@ public class ClientApp extends Application {
         jsonToSend.put("operation", infoJson.optString("operation"));
         jsonToSend.put("id", infoJson.optJSONArray("id"));
 
-        System.out.println("Client send data: " + jsonToSend);
+        System.out.println("Client send data to server: " + jsonToSend);
 
 
         try {
@@ -110,7 +123,7 @@ public class ClientApp extends Application {
         jsonToSend.put("operation", infoJson.optString("operation"));
         jsonToSend.put("userDetails", infoJson.optJSONObject("userDetails"));
 
-        System.out.println("Client send data: " + jsonToSend);
+        System.out.println("Client send data to server: " + jsonToSend);
 
         try {
             bw.write(jsonToSend.toString());
@@ -122,6 +135,48 @@ public class ClientApp extends Application {
 
         infoJson.put("toSend", false);
     }
+
+    public static void sendToServerInquiryProductsList(BufferedWriter bw, BufferedReader br) {
+
+//        JSONObject jsonToSend = new JSONObject();
+//        jsonToSend.put("operation", infoJson.optString("operation"));
+
+        System.out.println("Client send data to server: " + infoJson);
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        boolean run = true;
+        while(run){
+
+
+                try {
+//                    System.out.println("I waiting to order a data from server");
+                    String data = br.readLine();
+                    JSONObject answer = new JSONObject(data);
+
+                    if(Objects.equals(answer.optString("toSend"), "false")){
+                        infoJson = new JSONObject(data);
+//                        System.out.println("I order a data from server: "+ infoJson);
+
+                        run = false;
+                    }
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+        }
+
+
+//        infoJson.put("toSend", false);
+    }
+
 
 
     public static void main(String[] args) {

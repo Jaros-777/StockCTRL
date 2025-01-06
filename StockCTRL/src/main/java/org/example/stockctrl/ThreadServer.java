@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Objects;
 
 public class ThreadServer {
     private final Socket socket;
@@ -25,6 +26,10 @@ public class ThreadServer {
                 String data = br.readLine();
                 JSONObject json = new JSONObject(data);
                 System.out.println("I order a data: " + json.toString());
+                if (Objects.equals(json.optString("operation"), "giveProductsList")) {
+                    inquiryProductList(bw);
+                }
+
 
 //                String dane = br.readLine();
 //                JSONObject json = new JSONObject(dane);
@@ -46,4 +51,25 @@ public class ThreadServer {
             e.printStackTrace();
         }
     }
+
+    private static void inquiryProductList(BufferedWriter bw){
+        String[] testProductsList= {"Iphone", "Laptop"};
+
+        JSONObject toSend = new JSONObject();
+
+        toSend.put("toSend", false);
+        toSend.put("productsList", testProductsList);
+        System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
 }

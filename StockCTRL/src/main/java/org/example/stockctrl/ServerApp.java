@@ -3,12 +3,14 @@ package org.example.stockctrl;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Objects;
 
 public class ServerApp extends Application {
 
@@ -20,6 +22,8 @@ public class ServerApp extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ServerApp.class.getResource("server-main-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/icon-warehouse.png")));
+        stage.getIcons().add(image);
         stage.setTitle("StockCTRL Server");
         stage.setScene(scene);
         stage.show();
