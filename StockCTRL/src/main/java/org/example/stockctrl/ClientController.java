@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 
-public class ClientController {
+public class ClientController implements Initializable{
 
     @FXML
     private TextField userName;
@@ -31,6 +31,7 @@ public class ClientController {
     private TextField userAddress;
     @FXML
     private static ListView<String> productsList = new ListView<>();
+    private ObservableList<String> productListData;
 
 
 
@@ -52,14 +53,17 @@ public class ClientController {
 
     @FXML
     public void switchSceneToProductViev(ActionEvent event) throws IOException {
+        inquiryProductsList();
 
-        //inquiryProductsList();
-        new Thread(ClientController::inquiryProductsList).start();
+                FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
+                Scene scene = new Scene(main.load());
+                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                stage.setScene(scene);
 
-        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
-        Scene scene = new Scene(main.load());
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
+
+//        new Thread(ClientController::inquiryProductsList).start();
+
+
 
 
     }
@@ -144,7 +148,7 @@ public class ClientController {
     }
 
 
-    private static void inquiryProductsList() {
+    private  void inquiryProductsList() {
         System.out.println("Start downloading products list from server");
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
@@ -169,8 +173,10 @@ public class ClientController {
             if(orderedProductList != null && !orderedProductList.isEmpty()){
                 String cleanedString = orderedProductList.replace("[", "").replace("]", ""); // Usuń nawiasy
                 String[] productsListArray = cleanedString.split(",\\s*"); // Podziel po przecinku i opcjonalnych spacjach
-                productsList.getItems().clear();
-                productsList.getItems().addAll(productsListArray);
+                productListData.clear();
+                productListData.addAll(productsListArray);
+//                productsList.getItems().clear();
+//                productsList.getItems().addAll(productsListArray);
             }else{
                 System.out.println("List is empty");
             }
@@ -179,12 +185,12 @@ public class ClientController {
 
 
 
-
-
-
-//            String[] food = {"cos","cos"};
-//            productsList.getItems().addAll(food);
-
     }
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        productListData = FXCollections.observableArrayList();
+        productsList.setItems(productListData);
+
+    }
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Konfiguracja konsolowego appendera -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern> <!-- Format logów -->
+        </encoder>
+    </appender>
+
+    <!-- Konfiguracja logowania dla Hibernate -->
+    <logger name="org.hibernate" level="WARN"/> <!-- Zmniejsza poziom logowania Hibernate do WARN -->
+
+    <!-- Root logger (domyślny poziom logowania dla całej aplikacji) -->
+    <root level="INFO"> <!-- Ustaw poziom na INFO lub DEBUG, jeśli chcesz więcej szczegółów -->
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

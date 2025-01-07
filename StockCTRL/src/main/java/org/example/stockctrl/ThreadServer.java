@@ -1,10 +1,13 @@
 package org.example.stockctrl;
 
+import hibernate.PsqlDB;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ThreadServer {
@@ -53,12 +56,15 @@ public class ThreadServer {
     }
 
     private static void inquiryProductList(BufferedWriter bw){
-        String[] testProductsList= {"Iphone", "Laptop"};
+
+        //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
+        List<String> query = PsqlDB.sendQuery("SELECT name FROM DataBaseProducts");
+        System.out.println("Data from database: "+ query);
 
         JSONObject toSend = new JSONObject();
 
         toSend.put("toSend", false);
-        toSend.put("productsList", testProductsList);
+        toSend.put("productsList", query);
         System.out.println("Send to client: " + toSend);
         try {
             bw.write(toSend.toString());

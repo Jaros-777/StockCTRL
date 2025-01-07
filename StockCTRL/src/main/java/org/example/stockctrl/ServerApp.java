@@ -1,5 +1,7 @@
 package org.example.stockctrl;
 
+import hibernate.HibernateUtil;
+import hibernate.PsqlDB;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -60,6 +62,8 @@ public class ServerApp extends Application {
             //serverSocket.close();
         } catch (SocketException e) {
             if (!isServerRunning && serverSocket.isClosed()) {
+                PsqlDB.closeHibernateSession();
+                HibernateUtil.shutdown();
                 System.out.println("-- Server close --");
 
             } else {
