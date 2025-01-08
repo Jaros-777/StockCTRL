@@ -2,6 +2,7 @@ package org.example.stockctrl;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,11 +18,15 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
-public class ClientController implements Initializable{
+public class ClientController implements Initializable {
 
     @FXML
     private TextField userName;
@@ -30,9 +35,8 @@ public class ClientController implements Initializable{
     @FXML
     private TextField userAddress;
     @FXML
-    private static ListView<String> productsList = new ListView<>();
-    private ObservableList<String> productListData;
-
+    private ListView<String> productsList = new ListView<>();
+    private final ObservableList<String> productListData = FXCollections.observableArrayList();
 
 
     @FXML
@@ -53,19 +57,37 @@ public class ClientController implements Initializable{
 
     @FXML
     public void switchSceneToProductViev(ActionEvent event) throws IOException {
-        inquiryProductsList();
-
-                FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
-                Scene scene = new Scene(main.load());
-                Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                stage.setScene(scene);
+        FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
+        Scene waitingScene = new Scene(waitingLoader.load());
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.setScene(waitingScene);
 
 
-//        new Thread(ClientController::inquiryProductsList).start();
+        CompletableFuture.runAsync(() -> {
+            inquiryProductsList();
 
 
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
+                    Scene scene = new Scene(main.load());
+                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    ClientController controller = main.getController();
+                    controller.updateProductsList(productListData); // Make sure to pass the data stage.setScene(scene);
+                    stage.setScene(scene);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        });
 
+    }
 
+    public void updateProductsList(ObservableList<String> products) {
+        productListData.clear();
+        productListData.addAll(products);
+        productsList.setItems(productListData);
+        //System.out.println("Updated ListView with productListData: " + productsList.getItems());
     }
 
     @FXML
@@ -84,32 +106,6 @@ public class ClientController implements Initializable{
         stage.setScene(scene);
     }
 
-    //SERVER
-    @FXML
-    public void switchSceneToServerMainViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("server-main-view.fxml"));
-        Scene scene = new Scene(main.load());
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
-    }
-
-    @FXML
-    public void switchSceneToServerOrdersViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("server-orders-view.fxml"));
-        Scene scene = new Scene(main.load());
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
-    }
-
-    @FXML
-    public void switchSceneToServerStockLevelViev(ActionEvent event) throws IOException {
-
-            FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("server-stock-level-view.fxml"));
-            Scene scene = new Scene(main.load());
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-
-    }
 
     //LOGIC
     @FXML
@@ -148,7 +144,17 @@ public class ClientController implements Initializable{
     }
 
 
-    private  void inquiryProductsList() {
+    public void testUpdateListView() {
+        Platform.runLater(() -> {
+            System.out.println("Testing UI update");
+            productListData.clear();
+            productListData.addAll("Item 1", "Item 2", "Item 3");
+            productsList.setItems(productListData);
+            System.out.println("UI updated with test data: " + productsList.getItems());
+        });
+    }
+
+    private void inquiryProductsList() {
         System.out.println("Start downloading products list from server");
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
@@ -156,40 +162,42 @@ public class ClientController implements Initializable{
         ClientApp.controllerToClient(jsonToSend);
 
 
-         String orderedProductList= "";
+        String orderedProductList = "";
 
 
-
-
-            while (true) {
-                if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
-                    orderedProductList = ClientApp.ClientToController().optString("productsList");
-                    System.out.println("Received product list: " + orderedProductList);
-                    break;
-                }
+        while (true) {
+            if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                orderedProductList = ClientApp.ClientToController().optString("productsList");
+                System.out.println("Received product list: " + orderedProductList);
+                break;
             }
+        }
 
 
-            if(orderedProductList != null && !orderedProductList.isEmpty()){
-                String cleanedString = orderedProductList.replace("[", "").replace("]", ""); // Usuń nawiasy
-                String[] productsListArray = cleanedString.split(",\\s*"); // Podziel po przecinku i opcjonalnych spacjach
-                productListData.clear();
-                productListData.addAll(productsListArray);
-//                productsList.getItems().clear();
-//                productsList.getItems().addAll(productsListArray);
-            }else{
-                System.out.println("List is empty");
-            }
-            System.out.println("Finished downloading products from server");
+        if (orderedProductList != null && !orderedProductList.isEmpty()) {
+            String cleanedString = orderedProductList.replace("[", "").replace("]", ""); // Usuń nawiasy
+            List<String> productsListArray = List.of(cleanedString.split(",\\s*")); // Podziel po przecinku i opcjonalnych spacjach
 
 
+            productListData.clear();
+            productListData.addAll(productsListArray);
+            productsList.setItems(productListData);
+
+
+            //System.out.println("Products List Data " + productListData);
+            //System.out.println("Products List " + productsList.getItems());
+
+        } else {
+            System.out.println("List is empty");
+        }
+        System.out.println("Finished downloading products from server");
 
 
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        productListData = FXCollections.observableArrayList();
+
         productsList.setItems(productListData);
 
     }

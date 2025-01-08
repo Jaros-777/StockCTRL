@@ -18,6 +18,8 @@ import java.util.Scanner;
 
 public class ClientApp extends Application {
 
+
+    private static Socket socket;
     private static boolean isClientRunning = true;
     private static JSONObject infoJson = new JSONObject();
     private static JSONObject controllerInfo = new JSONObject();
