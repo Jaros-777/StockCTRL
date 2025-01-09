@@ -58,13 +58,21 @@ public class ThreadServer {
     private static void inquiryProductList(BufferedWriter bw){
 
         //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
-        List<String> query = PsqlDB.sendQuery("SELECT name FROM DataBaseProducts");
+        List<Integer> queryId = PsqlDB.sendQuery("SELECT id FROM DataBaseProducts", Integer.class);
+        List<String> queryName = PsqlDB.sendQuery("SELECT name FROM DataBaseProducts", String.class);
+
+        JSONObject query = new JSONObject();
+
+        for(int i =0; i< queryName.size(); i++){
+            //System.out.println("Wsadzam " + queryId.get(i).toString() +" " + queryName.get(i));
+            query.put(queryId.get(i).toString(), queryName.get(i));
+        }
         System.out.println("Data from database: "+ query);
 
         JSONObject toSend = new JSONObject();
 
         toSend.put("toSend", false);
-        toSend.put("productsList", query);
+        toSend.put("productsList", query.toString());
         System.out.println("Send to client: " + toSend);
         try {
             bw.write(toSend.toString());

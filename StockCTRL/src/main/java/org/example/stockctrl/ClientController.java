@@ -5,23 +5,26 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -35,8 +38,11 @@ public class ClientController implements Initializable {
     @FXML
     private TextField userAddress;
     @FXML
-    private ListView<String> productsList = new ListView<>();
-    private final ObservableList<String> productListData = FXCollections.observableArrayList();
+    private Button cartBtn = new Button("Cart (0)");
+    @FXML
+    private ListView<Product> productsList = new ListView<>();
+    private final ObservableList<Product> productsListData = FXCollections.observableArrayList();
+    private List<String> cartList = new ArrayList<>();
 
 
     @FXML
@@ -73,7 +79,7 @@ public class ClientController implements Initializable {
                     Scene scene = new Scene(main.load());
                     //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                     ClientController controller = main.getController();
-                    controller.updateProductsList(productListData); // Make sure to pass the data stage.setScene(scene);
+                    controller.updateProductsList(productsListData); // Make sure to pass the data stage.setScene(scene);
                     stage.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -83,10 +89,10 @@ public class ClientController implements Initializable {
 
     }
 
-    public void updateProductsList(ObservableList<String> products) {
-        productListData.clear();
-        productListData.addAll(products);
-        productsList.setItems(productListData);
+    public void updateProductsList(ObservableList<Product> products) {
+        productsListData.clear();
+        productsListData.addAll(products);
+        productsList.setItems(productsListData);
         //System.out.println("Updated ListView with productListData: " + productsList.getItems());
     }
 
@@ -144,14 +150,31 @@ public class ClientController implements Initializable {
     }
 
 
-    public void testUpdateListView() {
-        Platform.runLater(() -> {
-            System.out.println("Testing UI update");
-            productListData.clear();
-            productListData.addAll("Item 1", "Item 2", "Item 3");
-            productsList.setItems(productListData);
-            System.out.println("UI updated with test data: " + productsList.getItems());
-        });
+    public class Product extends HBox{
+        Label label = new Label();
+        Button button = new Button("Add to cart");
+
+        private String index;
+        Product(String productName, String index){
+            super();
+            this.index = index;
+
+            label.setText(productName);
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            button.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    System.out.println("clicked " + index);
+                    cartList.add(index);
+                    cartBtn.setText("Cart " +"(" + cartList.size() + ")");
+                }
+            });
+
+            this.getChildren().addAll(label,spacer, button);
+        }
+
+
     }
 
     private void inquiryProductsList() {
@@ -175,17 +198,18 @@ public class ClientController implements Initializable {
 
 
         if (orderedProductList != null && !orderedProductList.isEmpty()) {
-            String cleanedString = orderedProductList.replace("[", "").replace("]", ""); // Usuń nawiasy
-            List<String> productsListArray = List.of(cleanedString.split(",\\s*")); // Podziel po przecinku i opcjonalnych spacjach
 
+            JSONObject orderedProdJson = new JSONObject(orderedProductList);
 
-            productListData.clear();
-            productListData.addAll(productsListArray);
-            productsList.setItems(productListData);
+            productsListData.clear();
 
+            for(int i = 1; i<orderedProdJson.length(); i++ ){
 
-            //System.out.println("Products List Data " + productListData);
-            //System.out.println("Products List " + productsList.getItems());
+               productsListData.add(new Product(orderedProdJson.optString(""+i), ""+i)) ;
+
+            }
+
+            productsList.setItems(productsListData);
 
         } else {
             System.out.println("List is empty");
@@ -198,7 +222,7 @@ public class ClientController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        productsList.setItems(productListData);
+        productsList.setItems(productsListData);
 
     }
 }
