@@ -8,12 +8,13 @@ Requirements:
 
 In this project I used JavaFX, hibernate, PostgreSQL, socket-based client- server.  
 
-Target application performance and fuccialities:  
+Target application performance and functionality:  
 Server:  
 - Ability to check current orders   
 - Checking current inventory  
 Client:  
-- Login/registration form  
+- Login/registration form
+- Change of user address  
 - Easy to buy products ( without finalizing the transaction )  
 - insight into your orders  
 
