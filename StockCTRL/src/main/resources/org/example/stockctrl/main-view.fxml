@@ -35,7 +35,7 @@
          </font>
       </Button>
       <Button mnemonicParsing="false" onAction="#switchSceneToStartViev" text="Back" GridPane.halignment="LEFT" GridPane.valignment="CENTER" />
-      <Label alignment="CENTER" prefHeight="34.0" prefWidth="70.0" text="Hello" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+      <Label alignment="CENTER" prefHeight="34.0" prefWidth="70.0" text="Hello" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
          <font>
             <Font size="24.0" />
          </font>

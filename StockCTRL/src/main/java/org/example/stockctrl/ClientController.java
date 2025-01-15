@@ -2,14 +2,12 @@ package org.example.stockctrl;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -23,10 +21,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 
 public class ClientController implements Initializable {
@@ -40,15 +39,18 @@ public class ClientController implements Initializable {
     @FXML
     private Button cartBtn = new Button("Cart (0)");
     @FXML
-    private ListView<Product> productsList = new ListView<>();
-    private final ObservableList<Product> productsListData = FXCollections.observableArrayList();
-    private List<String> cartList = new ArrayList<>();
+    private ListView<ProductFX> productsList = new ListView<>();
+    private final ObservableList<ProductFX> productsListData = FXCollections.observableArrayList();
+    @FXML
+    private ListView<ProductCartFX> cartList = new ListView<>();
+    private final ObservableList<ProductCartFX> cartListData = FXCollections.observableArrayList();
 
 
     @FXML
     public void switchSceneToMainViev(ActionEvent event) throws IOException {
         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("main-view.fxml"));
         Scene scene = new Scene(main.load());
+        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
     }
@@ -57,6 +59,7 @@ public class ClientController implements Initializable {
     public void switchSceneToStartViev(ActionEvent event) throws IOException {
         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
         Scene scene = new Scene(main.load());
+        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
     }
@@ -65,6 +68,7 @@ public class ClientController implements Initializable {
     public void switchSceneToProductViev(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
+        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
@@ -77,6 +81,7 @@ public class ClientController implements Initializable {
                 try {
                     FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
                     Scene scene = new Scene(main.load());
+                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
                     //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                     ClientController controller = main.getController();
                     controller.updateProductsList(productsListData); // Make sure to pass the data stage.setScene(scene);
@@ -89,11 +94,10 @@ public class ClientController implements Initializable {
 
     }
 
-    public void updateProductsList(ObservableList<Product> products) {
+    public void updateProductsList(ObservableList<ProductFX> products) {
         productsListData.clear();
         productsListData.addAll(products);
         productsList.setItems(productsListData);
-        //System.out.println("Updated ListView with productListData: " + productsList.getItems());
     }
 
     @FXML
@@ -110,6 +114,44 @@ public class ClientController implements Initializable {
         Scene scene = new Scene(main.load());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
+    }
+
+    @FXML
+    public void switchSceneToCartViev(ActionEvent event) throws IOException {
+        FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
+        Scene waitingScene = new Scene(waitingLoader.load());
+        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.setScene(waitingScene);
+
+
+        CompletableFuture.runAsync(() -> {
+            inquiryCartList();
+
+
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("cart-view.fxml"));
+                    Scene scene = new Scene(main.load());
+                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    ClientController controller = main.getController();
+                    controller.updateCartList(cartListData); // Make sure to pass the data stage.setScene(scene);
+                    stage.setScene(scene);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        });
+
+
+    }
+
+    public void updateCartList(ObservableList<ProductCartFX> products) {
+        cartListData.clear();
+        cartListData.addAll(products);
+        cartList.setItems(cartListData);
+        System.out.println("Updated ListView with cartlist: " + cartList.getItems());
     }
 
 
@@ -150,29 +192,183 @@ public class ClientController implements Initializable {
     }
 
 
-    public class Product extends HBox{
-        Label label = new Label();
+    public class ProductFX extends HBox {
+        Label productName = new Label();
+        Label productPrice = new Label();
         Button button = new Button("Add to cart");
+        Product item;
+        private final int productId;
+        private int count=0;
 
-        private String index;
-        Product(String productName, String index){
+        ProductFX(Product product) {
             super();
-            this.index = index;
+            item = product;
+            this.productId = product.getId();
 
-            label.setText(productName);
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
+            productName.setText(product.getName());
+            BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
+            productPrice.setText(price +"$");
+            Region spacer1 = new Region();
+            Region spacer2 = new Region();
+            HBox.setHgrow(spacer1, Priority.ALWAYS);
+            HBox.setHgrow(spacer2, Priority.ALWAYS);
             button.setOnAction(new EventHandler<ActionEvent>() {
+
                 @Override
                 public void handle(ActionEvent event) {
-                    System.out.println("clicked " + index);
-                    cartList.add(index);
-                    cartBtn.setText("Cart " +"(" + cartList.size() + ")");
+                    boolean prodInCartIndex = false;
+                    for (ProductCartFX cartListDatum : cartListData) {
+
+                        if (cartListDatum.getProductId() == product.getId()) {
+                            prodInCartIndex = true;
+                            break;
+                        }
+                    }
+                    if(prodInCartIndex){
+                        setCount(count + 1);
+                    }else{
+//                        for (ProductFX product : productsListData) {
+//                            if (product.getProductId() == productId) {
+//                                product.setCount(1);
+//                                cartListData.add(product);
+//
+//                            }
+//                        }
+                        setCount(1);
+                        ProductCartFX item = new ProductCartFX(product, 1);
+                        cartListData.add(item);
+
+                    }
+                    System.out.println("Data after click: " + cartListData);
+                    cartList.setItems(cartListData);
+                    System.out.println("cart list after click: " + cartList.getItems());
+
+                    //Platform.runLater(()->  cartBtn.setText("Cart (" + cartListData.size() + ")"));
+
+
                 }
+
             });
 
-            this.getChildren().addAll(label,spacer, button);
+            this.getChildren().addAll(productName, spacer1,productPrice,spacer2,button);
         }
+
+        public int getProductId(){
+            return productId;
+        }
+        public void setCount(int count){
+            this.count = count;
+        }
+        public int getCount(){
+            return count;
+        }
+
+        public String toString(){
+            return item + " count: " + count;
+        }
+
+    }
+
+    public static class ProductCartFX extends HBox {
+        Label productName = new Label();
+        Label productPrice = new Label();
+        Button button = new Button("Delete");
+        Product item;
+        private final int productId;
+        private int count=0;
+
+        ProductCartFX(Product product,int count) {
+            super();
+            item = product;
+            this.productId = product.getId();
+            this.count = count;
+
+            productName.setText(product.getName());
+            BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
+            productPrice.setText(price +"$");
+            Region spacer1 = new Region();
+            Region spacer2 = new Region();
+            HBox.setHgrow(spacer1, Priority.ALWAYS);
+            HBox.setHgrow(spacer2, Priority.ALWAYS);
+            button.setOnAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public void handle(ActionEvent event) {
+
+
+
+                }
+
+            });
+
+            this.getChildren().addAll(productName, spacer1,productPrice,spacer2,button);
+        }
+
+        public int getProductId(){
+            return productId;
+        }
+        public void setCount(int count){
+            this.count = count;
+        }
+        public int getCount(){
+            return count;
+        }
+
+        public String toString(){
+            return item + " count: " + count;
+        }
+
+    }
+    private void inquiryCartList() {
+        System.out.println("Start downloading cart list list from server");
+        JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("toSend", true);
+        jsonToSend.put("operation", "giveCartList");
+        jsonToSend.put("userId", 1);
+        ClientApp.controllerToClient(jsonToSend);
+        System.out.println("Json sended");
+
+
+        String orderedCartList = "";
+
+
+        while (true) {
+            if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                orderedCartList = ClientApp.ClientToController().optString("cartList");
+                System.out.println("Received cart list: " + orderedCartList);
+                break;
+            }
+        }
+
+        if (orderedCartList != null && !orderedCartList.isEmpty()) {
+            System.out.println("dziala");
+            JSONArray orderedCartJson = new JSONArray(orderedCartList);
+            System.out.println("dziala");
+            cartListData.clear();
+
+            for (int i = 0; i < orderedCartJson.length(); i++) {
+                System.out.println("dziala");
+                JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
+                System.out.println(currentProductFromCart);
+//                int id = (int) currentProductFromCart.get("id");
+//                String name = (String) currentProductFromCart.get("name");
+//                int price = (int) currentProductFromCart.get("price");
+//                int count = (int) currentProductFromCart.get("count");
+//                Product product = new Product(id,name,price);
+//
+//                ProductCartFX item = new ProductCartFX(product,count);
+//                cartListData.add(item);
+
+
+
+            }
+
+            cartList.setItems(cartListData);
+
+        } else {
+            System.out.println("Cart is empty");
+        }
+        System.out.println("Finished downloading list products from server");
 
 
     }
@@ -196,16 +392,21 @@ public class ClientController implements Initializable {
             }
         }
 
-
         if (orderedProductList != null && !orderedProductList.isEmpty()) {
-
-            JSONObject orderedProdJson = new JSONObject(orderedProductList);
+            JSONArray orderedProdJson = new JSONArray(orderedProductList);
 
             productsListData.clear();
 
-            for(int i = 1; i<orderedProdJson.length(); i++ ){
+            for (int i = 0; i < orderedProdJson.length(); i++) {
+                JSONObject currentProduct = orderedProdJson.getJSONObject(i);
+                int id = (int) currentProduct.get("id");
+                String name = (String) currentProduct.get("name");
+                int price = (int) currentProduct.get("price");
+                Product product = new Product(id,name,price);
+                ProductFX item = new ProductFX(product);
+                productsListData.add(item);
 
-               productsListData.add(new Product(orderedProdJson.optString(""+i), ""+i)) ;
+
 
             }
 
@@ -223,6 +424,7 @@ public class ClientController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         productsList.setItems(productsListData);
+        cartList.setItems(cartListData);
 
     }
 }

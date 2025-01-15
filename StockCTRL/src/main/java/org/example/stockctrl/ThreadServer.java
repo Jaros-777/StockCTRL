@@ -1,6 +1,7 @@
 package org.example.stockctrl;
 
 import hibernate.PsqlDB;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -32,6 +33,9 @@ public class ThreadServer {
                 if (Objects.equals(json.optString("operation"), "giveProductsList")) {
                     inquiryProductList(bw);
                 }
+                if (Objects.equals(json.optString("operation"), "giveCartList")) {
+                    inquiryCartList(bw);
+                }
 
 
 //                String dane = br.readLine();
@@ -55,24 +59,65 @@ public class ThreadServer {
         }
     }
 
-    private static void inquiryProductList(BufferedWriter bw){
+    private static void inquiryCartList(BufferedWriter bw){
 
         //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
-        List<Integer> queryId = PsqlDB.sendQuery("SELECT id FROM DataBaseProducts", Integer.class);
-        List<String> queryName = PsqlDB.sendQuery("SELECT name FROM DataBaseProducts", String.class);
+        List<String> queryJsonCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = 1", String.class);
 
-        JSONObject query = new JSONObject();
+        //JSONArray productListJson = new JSONArray();
 
-        for(int i =0; i< queryName.size(); i++){
-            //System.out.println("Wsadzam " + queryId.get(i).toString() +" " + queryName.get(i));
-            query.put(queryId.get(i).toString(), queryName.get(i));
-        }
-        System.out.println("Data from database: "+ query);
+
+//        for(int i =0; i< queryJsonCartList.size(); i++){
+////            JSONObject item = new JSONObject();
+////            item.put("id", queryJsonCartList.get(i));
+////            item.put("name", queryProductName.get(i));
+////            item.put("price", queryProductPrice.get(i));
+////            productListJson.put(item);
+//        }
+        System.out.println("Data from database: "+ queryJsonCartList);
 
         JSONObject toSend = new JSONObject();
 
+
         toSend.put("toSend", false);
-        toSend.put("productsList", query.toString());
+        toSend.put("cartList", queryJsonCartList.toString());
+        System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+    private static void inquiryProductList(BufferedWriter bw){
+
+        //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
+        List<Integer> queryProductId = PsqlDB.sendQuery("SELECT id FROM DataBaseProducts", Integer.class);
+        List<String> queryProductName = PsqlDB.sendQuery("SELECT name FROM DataBaseProducts", String.class);
+        List<Integer> queryProductPrice = PsqlDB.sendQuery("SELECT price FROM DataBaseProducts", Integer.class);
+
+        JSONArray productListJson = new JSONArray();
+
+
+        for(int i =0; i< queryProductName.size(); i++){
+            JSONObject item = new JSONObject();
+            item.put("id", queryProductId.get(i));
+            item.put("name", queryProductName.get(i));
+            item.put("price", queryProductPrice.get(i));
+            productListJson.put(item);
+        }
+        System.out.println("Data from database: "+ productListJson);
+
+        JSONObject toSend = new JSONObject();
+
+
+        toSend.put("toSend", false);
+        toSend.put("productsList", productListJson);
         System.out.println("Send to client: " + toSend);
         try {
             bw.write(toSend.toString());

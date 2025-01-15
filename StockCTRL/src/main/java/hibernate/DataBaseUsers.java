@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.json.JSONObject;
 
 @Entity
 @Table(name="users")
@@ -14,6 +15,21 @@ public class DataBaseUsers {
 
     @Column(name = "name") // Dostosowanie nazwy kolumny
     private String userName;
+    @Column(name = "surname")
+    private String userSurname;
+    @Column
+    private String address;
+
+    public String getCartList() {
+        return cartList;
+    }
+
+    public void setCartList(String cartList) {
+        this.cartList = cartList;
+    }
+
+    @Column
+    private String cartList;
 
     public int getId() {
         return id;
@@ -47,10 +63,7 @@ public class DataBaseUsers {
         this.address = address;
     }
 
-    @Column(name = "surname")
-    private String userSurname;
-    @Column
-    private String address;
+
 
     @Override
     public String toString() {

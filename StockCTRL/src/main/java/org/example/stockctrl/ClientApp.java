@@ -40,6 +40,9 @@ public class ClientApp extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/icon-warehouse.png")));
         stage.getIcons().add(image);
+        //System.out.println(getClass().getResource("/styling.css"));
+        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+
         stage.setTitle("StockCTRL Client");
         stage.setScene(scene);
 
@@ -76,6 +79,9 @@ public class ClientApp extends Application {
                     }
                     if (Objects.equals(infoJson.optString("operation"), "giveProductsList")) {
                         sendToServerInquiryProductsList(bw, br);
+                    }
+                    if (Objects.equals(infoJson.optString("operation"), "giveCartList")) {
+                        sendToServerInquiryCartList(bw, br);
                     }
                 }
 
@@ -136,6 +142,48 @@ public class ClientApp extends Application {
         }
 
         infoJson.put("toSend", false);
+    }
+
+
+    public static void sendToServerInquiryCartList(BufferedWriter bw, BufferedReader br) {
+
+//        JSONObject jsonToSend = new JSONObject();
+//        jsonToSend.put("operation", infoJson.optString("operation"));
+
+        System.out.println("Client send data to server: " + infoJson);
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        boolean run = true;
+        while(run){
+
+
+            try {
+//                    System.out.println("I waiting to order a data from server");
+                String data = br.readLine();
+                JSONObject answer = new JSONObject(data);
+
+                if(Objects.equals(answer.optString("toSend"), "false")){
+                    infoJson = new JSONObject(data);
+//                        System.out.println("I order a data from server: "+ infoJson);
+
+                    run = false;
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
+//        infoJson.put("toSend", false);
     }
 
     public static void sendToServerInquiryProductsList(BufferedWriter bw, BufferedReader br) {
