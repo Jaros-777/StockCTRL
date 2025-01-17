@@ -39,6 +39,11 @@ public class ThreadServer {
                 if (Objects.equals(json.optString("operation"), "addProductToCart")) {
                     updateCartList( json.optString("product"));
                 }
+                if (Objects.equals(json.optString("operation"), "deleteProductFromCart")) {
+                    JSONObject bufor = new JSONObject(json.optString("productId"));
+                    //System.out.println(bufor.get("id"));
+                    deleteProductFromCartList(bw, (int)  bufor.get("id"));
+                }
 
 
 //                String dane = br.readLine();
@@ -62,12 +67,64 @@ public class ThreadServer {
         }
     }
 
+    private static void deleteProductFromCartList(BufferedWriter bw, int id){
+        //System.out.println(id);
+
+        List<String> actualCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = 1", String.class);
+
+        JSONArray oldCartList = new JSONArray(actualCartList.get(0));
+
+
+        for(int i =0; i < oldCartList.length(); i++){
+            JSONObject currentItem = oldCartList.getJSONObject(i);
+            JSONObject currentProduct = currentItem.getJSONObject("product");
+            //System.out.println(currentProduct.optString("id"));
+            //System.out.println(id);
+            //System.out.println(Objects.equals(currentProduct.optString("id"), id+""));
+
+            if(Objects.equals(currentProduct.optString("id"), id+"")){
+                //System.out.println("Before " + oldCartList);
+
+                if((int) currentItem.get("count") > 1){
+                    currentItem.put("count", (int) currentItem.get("count") - 1);
+                    System.out.println("Decrease product count");
+                }else{
+                    oldCartList.remove(i);
+                    System.out.println("Remove product");
+                }
+
+                //System.out.println("After " + oldCartList);
+                //System.out.println("Increase product count");
+
+
+                break;
+            }
+        }
+
+        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + oldCartList+ "' WHERE id = 1");
+
+        JSONObject toSend = new JSONObject();
+
+
+        toSend.put("toSend", false);
+       // System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     private static void updateCartList( String product){
 
         List<String> actualCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = 1", String.class);
 
         JSONArray oldCartList = new JSONArray(actualCartList.get(0));
-        System.out.println("Old " + oldCartList);
+        //System.out.println("Old " + oldCartList);
 
         JSONObject newProduct = new JSONObject(product);
         Boolean incrementCount = false;
@@ -80,6 +137,7 @@ public class ThreadServer {
 
                 incrementCount=true;
                 currentItem.put("count", (int) currentItem.get("count") + 1);
+                System.out.println("Increase product count");
 
 
                 break;
@@ -91,7 +149,8 @@ public class ThreadServer {
             newProductToCart.put("count", 1);
             newProductToCart.put("product", newProduct);
             oldCartList.put(newProductToCart);
-            System.out.println("Finish " + oldCartList);
+            //System.out.println("Finish " + oldCartList);
+            System.out.println("Add product to cart");
 
         }
 

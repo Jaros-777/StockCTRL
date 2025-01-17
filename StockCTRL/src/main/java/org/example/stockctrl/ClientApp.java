@@ -86,6 +86,9 @@ public class ClientApp extends Application {
                     if (Objects.equals(infoJson.optString("operation"), "addProductToCart")) {
                         sendToServerUpdateCart(bw);
                     }
+                    if (Objects.equals(infoJson.optString("operation"), "deleteProductFromCart")) {
+                        deleteItemFromCart(bw, br);
+                    }
                 }
 
 //                System.out.println("Podaj liczbe ");
@@ -106,6 +109,41 @@ public class ClientApp extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void deleteItemFromCart(BufferedWriter bw, BufferedReader br) {
+
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(true){
+
+
+            try {
+//                    System.out.println("I waiting to order a data from server");
+                String data = br.readLine();
+                JSONObject answer = new JSONObject(data);
+
+                if(Objects.equals(answer.optString("toSend"), "false")){
+                    infoJson = new JSONObject(data);
+//                        System.out.println("I order a data from server: "+ infoJson);
+
+                    break;
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        //infoJson.put("toSend", false);
     }
 
     public static void sendToServerUpdateCart(BufferedWriter bw) {
@@ -137,6 +175,8 @@ public class ClientApp extends Application {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+
 
         infoJson.put("toSend", false);
     }

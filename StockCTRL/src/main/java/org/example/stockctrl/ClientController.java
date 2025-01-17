@@ -234,7 +234,7 @@ public class ClientController implements Initializable {
                     //System.out.println("przed");
                     ClientApp.controllerToClient(jsonToSend);
                     //System.out.println("po");
-
+                    System.out.println("Finish adding product to cart");
                 }
 
             });
@@ -258,7 +258,7 @@ public class ClientController implements Initializable {
 
     }
 
-    public static class ProductCartFX extends HBox {
+    public class ProductCartFX extends HBox {
         Label productName = new Label();
         Label productPrice = new Label();
         Button button = new Button("Delete");
@@ -287,7 +287,38 @@ public class ClientController implements Initializable {
 
                 @Override
                 public void handle(ActionEvent event) {
+                    System.out.println("Start deleting product to cart");
 
+                    JSONObject productId = new JSONObject();
+                    productId.put("id", item.getId());
+                    //product.put("name", item.getName());
+                    //product.put("price", item.getPrice());
+
+
+
+                    JSONObject jsonToSend = new JSONObject();
+                    jsonToSend.put("toSend", true);
+                    jsonToSend.put("operation", "deleteProductFromCart");
+                    jsonToSend.put("productId", productId.toString());
+                    //System.out.println(jsonToSend);
+                    //System.out.println("przed");
+                    ClientApp.controllerToClient(jsonToSend);
+                    //System.out.println("po");
+
+                    while (true) {
+                        if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                            //System.out.println("DZIALA");
+                            try {
+                                switchSceneToCartViev(event);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            break;
+                        }
+                    }
+
+
+                    System.out.println("Finish deleting product to cart");
 
 
                 }
@@ -319,7 +350,7 @@ public class ClientController implements Initializable {
         jsonToSend.put("operation", "giveCartList");
         jsonToSend.put("userId", 1);
         ClientApp.controllerToClient(jsonToSend);
-        System.out.println("Json sended");
+        //System.out.println("Json sended");
 
 
         String orderedCartList = "";
@@ -339,7 +370,7 @@ public class ClientController implements Initializable {
 
             for (int i = 0; i < orderedCartJson.length(); i++) {
                JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
-                System.out.println(currentProductFromCart);
+                //System.out.println(currentProductFromCart);
 
                 int count = (int) currentProductFromCart.get("count");
                 //System.out.println("Count: "+ count);
