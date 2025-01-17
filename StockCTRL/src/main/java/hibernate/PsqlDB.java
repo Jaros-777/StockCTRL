@@ -1,7 +1,9 @@
 package hibernate;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,30 @@ public class PsqlDB {
         System.out.println(sendQuery("SELECT name FROM DataBaseProducts", String.class));
     }
 
+    public static void updateCartList(String queryName){
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            Query nativeQuery = session.createNativeQuery(queryName);
+            nativeQuery.executeUpdate();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+    }
 
     public static <T> List<T> sendQuery(String queryName, Class<T> type) {
 

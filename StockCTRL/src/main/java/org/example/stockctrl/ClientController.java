@@ -216,35 +216,24 @@ public class ClientController implements Initializable {
 
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean prodInCartIndex = false;
-                    for (ProductCartFX cartListDatum : cartListData) {
+                    System.out.println("Start adding product to cart");
 
-                        if (cartListDatum.getProductId() == product.getId()) {
-                            prodInCartIndex = true;
-                            break;
-                        }
-                    }
-                    if(prodInCartIndex){
-                        setCount(count + 1);
-                    }else{
-//                        for (ProductFX product : productsListData) {
-//                            if (product.getProductId() == productId) {
-//                                product.setCount(1);
-//                                cartListData.add(product);
-//
-//                            }
-//                        }
-                        setCount(1);
-                        ProductCartFX item = new ProductCartFX(product, 1);
-                        cartListData.add(item);
+                    //{"product":{"price":2999,"name":"Iphone 13 PRO MAX","id":1},"count":1}
+                    JSONObject product = new JSONObject();
+                    product.put("id", item.getId());
+                    product.put("name", item.getName());
+                    product.put("price", item.getPrice());
 
-                    }
-                    System.out.println("Data after click: " + cartListData);
-                    cartList.setItems(cartListData);
-                    System.out.println("cart list after click: " + cartList.getItems());
 
-                    //Platform.runLater(()->  cartBtn.setText("Cart (" + cartListData.size() + ")"));
 
+                    JSONObject jsonToSend = new JSONObject();
+                    jsonToSend.put("toSend", true);
+                    jsonToSend.put("operation", "addProductToCart");
+                    jsonToSend.put("product", product.toString());
+                    //System.out.println(jsonToSend);
+                    //System.out.println("przed");
+                    ClientApp.controllerToClient(jsonToSend);
+                    //System.out.println("po");
 
                 }
 
@@ -273,6 +262,7 @@ public class ClientController implements Initializable {
         Label productName = new Label();
         Label productPrice = new Label();
         Button button = new Button("Delete");
+        Label productCount = new Label();
         Product item;
         private final int productId;
         private int count=0;
@@ -286,10 +276,13 @@ public class ClientController implements Initializable {
             productName.setText(product.getName());
             BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
             productPrice.setText(price +"$");
+            productCount.setText(String.valueOf(count));
             Region spacer1 = new Region();
             Region spacer2 = new Region();
+            Region spacer3 = new Region();
             HBox.setHgrow(spacer1, Priority.ALWAYS);
             HBox.setHgrow(spacer2, Priority.ALWAYS);
+            HBox.setHgrow(spacer3, Priority.ALWAYS);
             button.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -301,7 +294,7 @@ public class ClientController implements Initializable {
 
             });
 
-            this.getChildren().addAll(productName, spacer1,productPrice,spacer2,button);
+            this.getChildren().addAll(productName, spacer1,productPrice,spacer2,productCount,spacer3,button);
         }
 
         public int getProductId(){
@@ -320,7 +313,7 @@ public class ClientController implements Initializable {
 
     }
     private void inquiryCartList() {
-        System.out.println("Start downloading cart list list from server");
+        System.out.println("Start downloading cart list from server");
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
         jsonToSend.put("operation", "giveCartList");
@@ -341,23 +334,25 @@ public class ClientController implements Initializable {
         }
 
         if (orderedCartList != null && !orderedCartList.isEmpty()) {
-            System.out.println("dziala");
             JSONArray orderedCartJson = new JSONArray(orderedCartList);
-            System.out.println("dziala");
             cartListData.clear();
 
             for (int i = 0; i < orderedCartJson.length(); i++) {
-                System.out.println("dziala");
-                JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
+               JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
                 System.out.println(currentProductFromCart);
-//                int id = (int) currentProductFromCart.get("id");
-//                String name = (String) currentProductFromCart.get("name");
-//                int price = (int) currentProductFromCart.get("price");
-//                int count = (int) currentProductFromCart.get("count");
-//                Product product = new Product(id,name,price);
-//
-//                ProductCartFX item = new ProductCartFX(product,count);
-//                cartListData.add(item);
+
+                int count = (int) currentProductFromCart.get("count");
+                //System.out.println("Count: "+ count);
+
+                JSONObject jsonProduct = (JSONObject) currentProductFromCart.get("product");
+                //System.out.println("Product: " +product);
+                String name = (String) jsonProduct.get("name");
+                int price = (int) jsonProduct.get("price");
+                int id = (int) jsonProduct.get("id");
+                Product product = new Product(id,name,price);
+
+                ProductCartFX item = new ProductCartFX(product,count);
+                cartListData.add(item);
 
 
 
@@ -368,7 +363,7 @@ public class ClientController implements Initializable {
         } else {
             System.out.println("Cart is empty");
         }
-        System.out.println("Finished downloading list products from server");
+        System.out.println("Finished downloading cart list from server");
 
 
     }

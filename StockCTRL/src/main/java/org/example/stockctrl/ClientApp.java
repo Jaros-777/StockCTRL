@@ -22,7 +22,7 @@ public class ClientApp extends Application {
     private static Socket socket;
     private static boolean isClientRunning = true;
     private static JSONObject infoJson = new JSONObject();
-    private static JSONObject controllerInfo = new JSONObject();
+    //private static JSONObject controllerInfo = new JSONObject();
 
     public static void controllerToClient(JSONObject json) {
         infoJson = json;
@@ -64,7 +64,7 @@ public class ClientApp extends Application {
             Socket socket = new Socket("localhost", 8080);
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            Scanner scanner = new Scanner(System.in);
+            //Scanner scanner = new Scanner(System.in);
 
             System.out.println("-- Client " + socket.getInetAddress() + " connected with server --");
 
@@ -82,6 +82,9 @@ public class ClientApp extends Application {
                     }
                     if (Objects.equals(infoJson.optString("operation"), "giveCartList")) {
                         sendToServerInquiryCartList(bw, br);
+                    }
+                    if (Objects.equals(infoJson.optString("operation"), "addProductToCart")) {
+                        sendToServerUpdateCart(bw);
                     }
                 }
 
@@ -105,6 +108,19 @@ public class ClientApp extends Application {
         }
     }
 
+    public static void sendToServerUpdateCart(BufferedWriter bw) {
+
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        infoJson.put("toSend", false);
+    }
     public static void sendToServerBuy(BufferedWriter bw) {
 
         JSONObject jsonToSend = new JSONObject();
