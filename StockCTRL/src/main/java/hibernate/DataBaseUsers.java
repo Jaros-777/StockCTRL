@@ -31,6 +31,17 @@ public class DataBaseUsers {
     @Column
     private String cartList;
 
+    public String getOrder() {
+        return order;
+    }
+
+    public void setOrder(String order) {
+        this.order = order;
+    }
+
+    @Column
+    private String order;
+
     public int getId() {
         return id;
     }

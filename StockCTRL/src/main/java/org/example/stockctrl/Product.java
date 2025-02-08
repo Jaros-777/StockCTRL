@@ -5,6 +5,16 @@ public class Product {
     private String name;
     private int price;
 
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    private int count;
+
     Product(int id, String name, int price){
         this.id = id;
         this.name = name;

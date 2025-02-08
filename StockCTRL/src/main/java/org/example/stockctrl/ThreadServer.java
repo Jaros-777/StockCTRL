@@ -1,5 +1,6 @@
 package org.example.stockctrl;
 
+import hibernate.DataBaseOrders;
 import hibernate.PsqlDB;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,20 +45,15 @@ public class ThreadServer {
                     //System.out.println(bufor.get("id"));
                     deleteProductFromCartList(bw, (int)  bufor.get("id"));
                 }
-
-
-//                String dane = br.readLine();
-//                JSONObject json = new JSONObject(dane);
-//                System.out.println("I order an info: "+ json.optInt("Number"));
-//                JSONObject odp = new JSONObject();
-//                Boolean answer = false;
-//                if(json.optInt("Number") == 4){
-//                    answer = true;
-//                }
-//                odp.put("Odp", answer);
-//                bw.write(odp.toString());
-//                bw.newLine();
-//                bw.flush();
+                if (Objects.equals(json.optString("operation"), "buy")) {
+                    updateOrderList( json.optString("order"), bw);
+                }
+                if (Objects.equals(json.optString("operation"), "deleteCartList")) {
+                    deleteCartList(bw);
+                }
+                if (Objects.equals(json.optString("operation"), "giveOrdersList")) {
+                    inquiryOrdersList(bw);
+                }
             }
             socket.close();
         } catch (SocketException e) {
@@ -67,6 +63,92 @@ public class ThreadServer {
         }
     }
 
+    private static void inquiryOrdersList(BufferedWriter bw){
+
+        //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
+        List<DataBaseOrders> query = PsqlDB.sendQuery("SELECT o FROM DataBaseOrders o WHERE o.userId = 1", DataBaseOrders.class);
+
+        JSONArray orderListJson = new JSONArray();
+
+
+        for(int i =0; i< query.size(); i++){
+
+            JSONObject item = new JSONObject();
+            item.put("id", query.get(i).getId());
+            item.put("status", query.get(i).getStatus());
+
+            item.put("products", query.get(i).getProducts());
+
+            orderListJson.put(item);
+        }
+        System.out.println("Data from database: "+ orderListJson);
+
+        JSONObject toSend = new JSONObject();
+
+
+        toSend.put("toSend", false);
+        toSend.put("ordersList", orderListJson);
+        System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+    private static void deleteCartList(BufferedWriter bw){
+
+        JSONArray emptyCartList = new JSONArray();
+
+
+
+        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + emptyCartList+ "' WHERE id = 1");
+
+        JSONObject toSend = new JSONObject();
+
+
+        toSend.put("toSend", false);
+        // System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    private static void updateOrderList( String order, BufferedWriter bw){
+
+
+        JSONObject newOrder = new JSONObject(order);
+
+        System.out.println("New order" +  newOrder);
+
+
+        PsqlDB.addOrder(newOrder.optInt("userId"),newOrder.optString("status"),newOrder.optJSONArray("orderList"));
+
+        JSONObject toSend = new JSONObject();
+
+        toSend.put("toSend", false);
+        // System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+            System.out.println("Server sended");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
     private static void deleteProductFromCartList(BufferedWriter bw, int id){
         //System.out.println(id);
 

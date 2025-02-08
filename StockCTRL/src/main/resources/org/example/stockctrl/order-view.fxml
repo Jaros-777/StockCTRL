@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<GridPane hgap="20.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="700.0" vgap="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.stockctrl.ClientController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.stockctrl.ClientController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -21,12 +21,12 @@
     </rowConstraints>
     <children>
         <Button mnemonicParsing="false" onAction="#switchSceneToMainViev" text="Back" textAlignment="CENTER" GridPane.halignment="LEFT" GridPane.valignment="CENTER" />
-        <Label alignment="CENTER" prefHeight="48.0" prefWidth="152.0" text="Order List" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+        <Label alignment="CENTER" prefHeight="48.0" prefWidth="152.0" text="Order List" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
             <font>
                 <Font size="18.0" />
             </font>
         </Label>
-      <ListView fx:id="productsList" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <ListView fx:id="orderList" prefHeight="60.0" prefWidth="100.0" GridPane.columnSpan="3" GridPane.rowIndex="2" GridPane.rowSpan="3" />
     </children>
     <padding>
         <Insets left="50.0" right="50.0" />

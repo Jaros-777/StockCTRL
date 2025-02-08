@@ -8,6 +8,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -44,6 +46,9 @@ public class ClientController implements Initializable {
     @FXML
     private ListView<ProductCartFX> cartList = new ListView<>();
     private final ObservableList<ProductCartFX> cartListData = FXCollections.observableArrayList();
+    @FXML
+    private ListView<OrderFX> orderList = new ListView<>();
+    private final ObservableList<OrderFX> orderListData = FXCollections.observableArrayList();
 
 
     @FXML
@@ -102,10 +107,37 @@ public class ClientController implements Initializable {
 
     @FXML
     public void switchSceneToOrderViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("order-view.fxml"));
-        Scene scene = new Scene(main.load());
+        FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
+        Scene waitingScene = new Scene(waitingLoader.load());
+        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
+        stage.setScene(waitingScene);
+
+
+        CompletableFuture.runAsync(() -> {
+            inquiryOrderList();
+
+
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("order-view.fxml"));
+                    Scene scene = new Scene(main.load());
+                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    ClientController controller = main.getController();
+                    controller.updateOrderList(orderListData); // Make sure to pass the data stage.setScene(scene);
+                    stage.setScene(scene);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        });
+    }
+
+    public void updateOrderList(ObservableList<OrderFX> products) {
+        orderListData.clear();
+        orderListData.addAll(products);
+        orderList.setItems(orderListData);
     }
 
     @FXML
@@ -151,24 +183,69 @@ public class ClientController implements Initializable {
         cartListData.clear();
         cartListData.addAll(products);
         cartList.setItems(cartListData);
-        System.out.println("Updated ListView with cartlist: " + cartList.getItems());
+        //System.out.println("Updated ListView with cartlist: " + cartList.getItems());
     }
 
 
     //LOGIC
     @FXML
     public void buyProducts(ActionEvent event) {
-        JSONObject json = new JSONObject();
-        json.put("toSend", true);
-        json.put("operation", "buy");
-        JSONArray arr = new JSONArray();
-        arr.put(1);
-        arr.put(2);
-        arr.put(3);
-        arr.put(4);
-        json.put("id", arr);
+        if (!cartListData.isEmpty()) {
 
-        ClientApp.controllerToClient(json);
+
+            JSONObject json = new JSONObject();
+            json.put("toSend", true);
+            json.put("operation", "buy");
+
+            JSONObject orderList = new JSONObject();
+            orderList.put("userId", 1);
+            orderList.put("date", LocalDate.now());
+            orderList.put("status", "to pack");
+
+            JSONArray orderListProducts = new JSONArray();
+
+            for (ProductCartFX prod : cartListData) {
+                orderListProducts.put(prod.toJson());
+            }
+
+            orderList.put("orderList", orderListProducts);
+            System.out.println("OrderList:" + orderList);
+
+
+            json.put("order", orderList.toString());
+
+            ClientApp.controllerToClient(json);
+
+
+            while (true) {
+                if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                    System.out.println("Clear cart list");
+                    JSONObject jsonToSend = new JSONObject();
+                    jsonToSend.put("toSend", true);
+                    jsonToSend.put("operation", "deleteCartList");
+                    ClientApp.controllerToClient(jsonToSend);
+
+                    while (true) {
+                        if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                            //System.out.println("DZIALA");
+                            try {
+                                switchSceneToCartViev(event);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            break;
+                        }
+                    }
+
+
+                    System.out.println("Finish deleting cartList");
+                    break;
+                }
+            }
+        } else {
+            System.out.println("Cart List is empty");
+        }
+
 
     }
 
@@ -191,6 +268,74 @@ public class ClientController implements Initializable {
         ClientApp.controllerToClient(jsonToSend);
     }
 
+    public class OrderFX extends HBox {
+        Label productName = new Label();
+        Label productPrice = new Label();
+        Label productCount = new Label();
+        List<Product> orderList;
+        private int orderId;
+
+        OrderFX(List<Product> orderList, int id, String status) {
+            super();
+            this.orderList = orderList;
+            this.orderId = id;
+
+            StringBuilder productNameText= new StringBuilder();
+            StringBuilder productPriceText = new StringBuilder();
+            StringBuilder productCountText = new StringBuilder();
+
+            productNameText.append("Order ID: \n");
+            productPriceText.append(id + "\n");
+            productCountText.append("\n");
+
+            productNameText.append("Current status: \n \n");
+            productPriceText.append(status + "\n \n");
+            productCountText.append("\n \n");
+
+            productNameText.append("Products name \n");
+            productPriceText.append("Price \n");
+            productCountText.append("Count \n");
+            for(int i =0; i < orderList.size(); i++){
+                productNameText.append(orderList.get(i).getName());
+                productNameText.append("\n");
+                productPriceText.append(BigDecimal.valueOf(orderList.get(i).getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP)+"$");
+                productPriceText.append("\n");
+                productCountText.append(orderList.get(i).getCount());
+                productCountText.append("\n");
+
+
+            }
+            productNameText.append("\n");
+            productPriceText.append("\n");
+            productCountText.append("\n");
+            productName.setText(String.valueOf(productNameText));
+            productPrice.setText(String.valueOf(productPriceText));
+            productCount.setText(String.valueOf(productCountText));
+
+
+//            productName.setText(product.getName());
+//            BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
+//            productPrice.setText(price +"$");
+//            productCount.setText(String.valueOf(product.getCount()));
+//
+            Region spacer1 = new Region();
+            Region spacer2 = new Region();
+            HBox.setHgrow(spacer1, Priority.ALWAYS);
+            HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+            HBox hbox = new HBox(70);
+            hbox.setAlignment(Pos.CENTER_LEFT);
+
+            hbox.getChildren().addAll(productName,spacer1,productPrice,spacer2,productCount);
+            this.getChildren().add(hbox);
+        }
+
+
+//        public String toString(){
+//            return item + " count: " + count;
+//        }
+
+    }
 
     public class ProductFX extends HBox {
         Label productName = new Label();
@@ -198,7 +343,7 @@ public class ClientController implements Initializable {
         Button button = new Button("Add to cart");
         Product item;
         private final int productId;
-        private int count=0;
+        private int count = 0;
 
         ProductFX(Product product) {
             super();
@@ -207,7 +352,7 @@ public class ClientController implements Initializable {
 
             productName.setText(product.getName());
             BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
-            productPrice.setText(price +"$");
+            productPrice.setText(price + "$");
             Region spacer1 = new Region();
             Region spacer2 = new Region();
             HBox.setHgrow(spacer1, Priority.ALWAYS);
@@ -225,7 +370,6 @@ public class ClientController implements Initializable {
                     product.put("price", item.getPrice());
 
 
-
                     JSONObject jsonToSend = new JSONObject();
                     jsonToSend.put("toSend", true);
                     jsonToSend.put("operation", "addProductToCart");
@@ -239,20 +383,22 @@ public class ClientController implements Initializable {
 
             });
 
-            this.getChildren().addAll(productName, spacer1,productPrice,spacer2,button);
+            this.getChildren().addAll(productName, spacer1, productPrice, spacer2, button);
         }
 
-        public int getProductId(){
+        public int getProductId() {
             return productId;
         }
-        public void setCount(int count){
+
+        public void setCount(int count) {
             this.count = count;
         }
-        public int getCount(){
+
+        public int getCount() {
             return count;
         }
 
-        public String toString(){
+        public String toString() {
             return item + " count: " + count;
         }
 
@@ -265,9 +411,9 @@ public class ClientController implements Initializable {
         Label productCount = new Label();
         Product item;
         private final int productId;
-        private int count=0;
+        private int count = 0;
 
-        ProductCartFX(Product product,int count) {
+        ProductCartFX(Product product, int count) {
             super();
             item = product;
             this.productId = product.getId();
@@ -275,7 +421,7 @@ public class ClientController implements Initializable {
 
             productName.setText(product.getName());
             BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
-            productPrice.setText(price +"$");
+            productPrice.setText(price + "$");
             productCount.setText(String.valueOf(count));
             Region spacer1 = new Region();
             Region spacer2 = new Region();
@@ -293,7 +439,6 @@ public class ClientController implements Initializable {
                     productId.put("id", item.getId());
                     //product.put("name", item.getName());
                     //product.put("price", item.getPrice());
-
 
 
                     JSONObject jsonToSend = new JSONObject();
@@ -325,24 +470,101 @@ public class ClientController implements Initializable {
 
             });
 
-            this.getChildren().addAll(productName, spacer1,productPrice,spacer2,productCount,spacer3,button);
+            this.getChildren().addAll(productName, spacer1, productPrice, spacer2, productCount, spacer3, button);
         }
 
-        public int getProductId(){
+        public int getProductId() {
             return productId;
         }
-        public void setCount(int count){
+
+        public void setCount(int count) {
             this.count = count;
         }
-        public int getCount(){
+
+        public int getCount() {
             return count;
         }
 
-        public String toString(){
+        public String toString() {
             return item + " count: " + count;
         }
 
+        public JSONObject toJson() {
+            JSONObject prod = new JSONObject();
+
+            prod.put("id", item.getId());
+            prod.put("name", item.getName());
+            prod.put("price", item.getPrice());
+            prod.put("count", count);
+
+            return prod;
+        }
+
     }
+
+    private void inquiryOrderList() {
+        System.out.println("Start downloading order list from server");
+        JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("toSend", true);
+        jsonToSend.put("operation", "giveOrdersList");
+        ClientApp.controllerToClient(jsonToSend);
+
+
+        String orderedOrderList = "";
+
+
+        while (true) {
+            if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                orderedOrderList = ClientApp.ClientToController().optString("ordersList");
+                System.out.println("Received orders list: " + orderedOrderList);
+                break;
+            }
+        }
+
+        if (orderedOrderList != null && !orderedOrderList.isEmpty()) {
+            JSONArray orderedProdJson = new JSONArray(orderedOrderList);
+            orderListData.clear();
+
+            for (int i = 0; i < orderedProdJson.length(); i++) {
+                JSONObject currentOrder = orderedProdJson.getJSONObject(i);
+
+
+                int id = (int) currentOrder.get("id");
+                String status = (String) currentOrder.get("status");
+
+                JSONArray products = new JSONArray((String) currentOrder.get("products"));
+
+                List<Product> listProducts = new ArrayList<>();
+
+                for (int j = 0; j < products.length(); j++) {
+                    JSONObject currentProductFromOrder = products.getJSONObject(j);
+                    String name = (String) currentProductFromOrder.get("name");
+                    int price = (int) currentProductFromOrder.get("price");
+                    int productId = (int) currentProductFromOrder.get("id");
+                    int count = (int) currentProductFromOrder.get("count");
+
+
+                    Product product = new Product(productId, name, price);
+                    product.setCount(count);
+                    listProducts.add(product);
+
+
+                }
+                OrderFX order = new OrderFX(listProducts, id, status);
+
+                orderListData.add(order);
+            }
+            orderList.setItems(orderListData);
+
+        } else {
+            System.out.println("You don't have any orders yet");
+        }
+        //System.out.println(orderList);
+        System.out.println("Finished downloading order from server");
+
+
+    }
+
     private void inquiryCartList() {
         System.out.println("Start downloading cart list from server");
         JSONObject jsonToSend = new JSONObject();
@@ -369,7 +591,7 @@ public class ClientController implements Initializable {
             cartListData.clear();
 
             for (int i = 0; i < orderedCartJson.length(); i++) {
-               JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
+                JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
                 //System.out.println(currentProductFromCart);
 
                 int count = (int) currentProductFromCart.get("count");
@@ -380,11 +602,10 @@ public class ClientController implements Initializable {
                 String name = (String) jsonProduct.get("name");
                 int price = (int) jsonProduct.get("price");
                 int id = (int) jsonProduct.get("id");
-                Product product = new Product(id,name,price);
+                Product product = new Product(id, name, price);
 
-                ProductCartFX item = new ProductCartFX(product,count);
+                ProductCartFX item = new ProductCartFX(product, count);
                 cartListData.add(item);
-
 
 
             }
@@ -428,10 +649,9 @@ public class ClientController implements Initializable {
                 int id = (int) currentProduct.get("id");
                 String name = (String) currentProduct.get("name");
                 int price = (int) currentProduct.get("price");
-                Product product = new Product(id,name,price);
+                Product product = new Product(id, name, price);
                 ProductFX item = new ProductFX(product);
                 productsListData.add(item);
-
 
 
             }
@@ -451,6 +671,7 @@ public class ClientController implements Initializable {
 
         productsList.setItems(productsListData);
         cartList.setItems(cartListData);
+        orderList.setItems(orderListData);
 
     }
 }

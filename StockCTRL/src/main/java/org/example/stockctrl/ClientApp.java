@@ -75,7 +75,7 @@ public class ClientApp extends Application {
                         sendToServerChangeUserDetails(bw);
                     }
                     if (Objects.equals(infoJson.optString("operation"), "buy")) {
-                        sendToServerBuy(bw);
+                        sendToServerBuy(bw, br);
                     }
                     if (Objects.equals(infoJson.optString("operation"), "giveProductsList")) {
                         sendToServerInquiryProductsList(bw, br);
@@ -88,6 +88,12 @@ public class ClientApp extends Application {
                     }
                     if (Objects.equals(infoJson.optString("operation"), "deleteProductFromCart")) {
                         deleteItemFromCart(bw, br);
+                    }
+                    if (Objects.equals(infoJson.optString("operation"), "deleteCartList")) {
+                        deleteCartList(bw, br);
+                    }
+                    if (Objects.equals(infoJson.optString("operation"), "giveOrdersList")) {
+                        sendToServerInquiryOrdersList(bw, br);
                     }
                 }
 
@@ -111,6 +117,78 @@ public class ClientApp extends Application {
         }
     }
 
+
+    public static void sendToServerInquiryOrdersList(BufferedWriter bw, BufferedReader br) {
+
+//        JSONObject jsonToSend = new JSONObject();
+//        jsonToSend.put("operation", infoJson.optString("operation"));
+
+        System.out.println("Client send data to server: " + infoJson);
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        boolean run = true;
+        while(run){
+
+
+            try {
+//                    System.out.println("I waiting to order a data from server");
+                String data = br.readLine();
+                JSONObject answer = new JSONObject(data);
+
+                if(Objects.equals(answer.optString("toSend"), "false")){
+                    infoJson = new JSONObject(data);
+//                        System.out.println("I order a data from server: "+ infoJson);
+
+                    run = false;
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
+//        infoJson.put("toSend", false);
+    }
+    public static void deleteCartList(BufferedWriter bw, BufferedReader br) {
+
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        while(true){
+
+
+            try {
+                String data = br.readLine();
+                JSONObject answer = new JSONObject(data);
+
+                if(Objects.equals(answer.optString("toSend"), "false")){
+                    infoJson = new JSONObject(data);
+
+                    break;
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+    }
     public static void deleteItemFromCart(BufferedWriter bw, BufferedReader br) {
 
 
@@ -159,11 +237,11 @@ public class ClientApp extends Application {
 
         infoJson.put("toSend", false);
     }
-    public static void sendToServerBuy(BufferedWriter bw) {
+    public static void sendToServerBuy(BufferedWriter bw, BufferedReader br) {
 
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("operation", infoJson.optString("operation"));
-        jsonToSend.put("id", infoJson.optJSONArray("id"));
+        jsonToSend.put("order", infoJson.optString("order"));
 
         System.out.println("Client send data to server: " + jsonToSend);
 
@@ -177,8 +255,29 @@ public class ClientApp extends Application {
         }
 
 
+        while(true){
 
-        infoJson.put("toSend", false);
+
+            try {
+//                    System.out.println("I waiting to order a data from server");
+                String data = br.readLine();
+                JSONObject answer = new JSONObject(data);
+
+                if(Objects.equals(answer.optString("toSend"), "false")){
+                    infoJson = new JSONObject(data);
+                        //System.out.println("I order a data from server: "+ infoJson);
+                    System.out.println("Client order");
+                    break;
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
+        //infoJson.put("toSend", false);
     }
 
     public static void sendToServerChangeUserDetails(BufferedWriter bw) {

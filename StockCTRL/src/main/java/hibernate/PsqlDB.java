@@ -2,8 +2,11 @@ package hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.dialect.AbstractPostgreSQLJsonPGObjectType;
+import org.hibernate.dialect.PostgreSQLJsonPGObjectJsonType;
 import org.hibernate.query.Query;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,31 @@ public class PsqlDB {
         System.out.println(sendQuery("SELECT name FROM DataBaseProducts", String.class));
     }
 
+    public static void addOrder( int userId, String status, JSONArray products){
+        Session session = HibernateUtil.getSession();
+        Transaction transaction = null;
+
+        try {
+            transaction = session.beginTransaction();
+
+
+            System.out.println(userId + " " +status+ " " +products);
+            // Wykonujemy natywne zapytanie SQL
+            session.createNativeQuery("INSERT INTO orders ( user_id, status, products) VALUES ('" + userId +"','"+status + "','" + products + "')")
+                    .executeUpdate();
+
+            transaction.commit();
+            System.out.println("Successfull added new order");
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
     public static void updateCartList(String queryName){
         Session session = null;
         Transaction transaction = null;
