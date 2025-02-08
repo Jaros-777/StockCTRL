@@ -13,7 +13,7 @@ Target application performance and functionality:
 - ⏳ Ability to check current orders   
 - ⏳ Checking current inventory
 🙋🏻‍♂️ Client:  
-- Login/registration form
+- ⏳ Login/registration form  
 - ✅ Change of user address  
 - ✅ Easy to buy products ( without finalizing the transaction )  
 - ✅ insight into your orders  
