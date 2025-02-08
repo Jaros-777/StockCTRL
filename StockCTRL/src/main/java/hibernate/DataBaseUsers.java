@@ -19,6 +19,29 @@ public class DataBaseUsers {
     private String userSurname;
     @Column
     private String address;
+    @Column
+    private String order;
+    @Column
+    private String login;
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Column
+    private String password;
 
     public String getCartList() {
         return cartList;
@@ -39,8 +62,7 @@ public class DataBaseUsers {
         this.order = order;
     }
 
-    @Column
-    private String order;
+
 
     public int getId() {
         return id;

@@ -42,7 +42,6 @@ public class ThreadServer {
                 }
                 if (Objects.equals(json.optString("operation"), "deleteProductFromCart")) {
                     JSONObject bufor = new JSONObject(json.optString("productId"));
-                    //System.out.println(bufor.get("id"));
                     deleteProductFromCartList(bw, (int)  bufor.get("id"));
                 }
                 if (Objects.equals(json.optString("operation"), "buy")) {
@@ -54,6 +53,9 @@ public class ThreadServer {
                 if (Objects.equals(json.optString("operation"), "giveOrdersList")) {
                     inquiryOrdersList(bw);
                 }
+                if (Objects.equals(json.optString("operation"), "checkLogin")) {
+                    checkLogin(bw, json);
+                }
             }
             socket.close();
         } catch (SocketException e) {
@@ -62,7 +64,43 @@ public class ThreadServer {
             e.printStackTrace();
         }
     }
+    private static void checkLogin(BufferedWriter bw, JSONObject orderedJson){
 
+        String login = orderedJson.optString("login");
+        String password = orderedJson.optString("password");
+
+
+        List<String> queryLogin = PsqlDB.sendQuery("SELECT password FROM DataBaseUsers WHERE login = '" +login + "'", String.class);
+
+
+        JSONObject toSend = new JSONObject();
+        toSend.put("toSend", false);
+        if(queryLogin.isEmpty()){
+            toSend.put("answerLogin", false);
+        }else{
+            //System.out.println(queryLogin.get(0));
+            //System.out.println(password);
+            if (Objects.equals(queryLogin.get(0), password)){
+                toSend.put("answerLogin", true);
+            }else{
+                toSend.put("answerLogin", false);
+            }
+        }
+
+
+
+        System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
     private static void inquiryOrdersList(BufferedWriter bw){
 
         //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");

@@ -95,6 +95,9 @@ public class ClientApp extends Application {
                     if (Objects.equals(infoJson.optString("operation"), "giveOrdersList")) {
                         sendToServerInquiryOrdersList(bw, br);
                     }
+                    if (Objects.equals(infoJson.optString("operation"), "checkLogin")) {
+                        checkLogin(bw, br);
+                    }
                 }
 
 //                System.out.println("Podaj liczbe ");
@@ -117,7 +120,42 @@ public class ClientApp extends Application {
         }
     }
 
+    public static void checkLogin(BufferedWriter bw, BufferedReader br) {
 
+//        JSONObject jsonToSend = new JSONObject();
+//        jsonToSend.put("operation", infoJson.optString("operation"));
+
+        System.out.println("Client send data to server: " + infoJson);
+
+        try {
+            bw.write(infoJson.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        boolean run = true;
+        while(run){
+
+
+            try {
+                String data = br.readLine();
+                JSONObject answer = new JSONObject(data);
+
+                if(Objects.equals(answer.optString("toSend"), "false")){
+                    infoJson = new JSONObject(data);
+                    run = false;
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
+    }
     public static void sendToServerInquiryOrdersList(BufferedWriter bw, BufferedReader br) {
 
 //        JSONObject jsonToSend = new JSONObject();

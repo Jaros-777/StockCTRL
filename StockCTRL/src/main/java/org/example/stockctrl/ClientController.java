@@ -10,10 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -39,6 +36,13 @@ public class ClientController implements Initializable {
     @FXML
     private TextField userAddress;
     @FXML
+    private Label incorrectPass;
+    @FXML
+    private TextField login;
+    @FXML
+    private PasswordField password;
+    private boolean isLogged = false;
+    @FXML
     private Button cartBtn = new Button("Cart (0)");
     @FXML
     private ListView<ProductFX> productsList = new ListView<>();
@@ -58,6 +62,52 @@ public class ClientController implements Initializable {
         scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
+
+    }
+
+    @FXML
+    public void switchSceneToMainVievLOGIN(ActionEvent event) throws IOException {
+        FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
+        Scene waitingScene = new Scene(waitingLoader.load());
+        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.setScene(waitingScene);
+
+        CompletableFuture.runAsync(() -> {
+                checkLogin();
+
+            Platform.runLater(() -> {
+                if (isLogged) {
+                    try {
+                        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("main-view.fxml"));
+                        Scene scene = new Scene(main.load());
+                        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                        stage.setScene(scene);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                } else {
+                    try {
+                        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
+                        Scene scene = new Scene(main.load());
+                        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                        ClientController controller = main.getController();
+                        controller.showIncorrectPass();
+                        stage.setScene(scene);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+
+        });
+    }
+
+    public void showIncorrectPass() {
+        incorrectPass.setOpacity(1);
     }
 
     @FXML
@@ -67,7 +117,9 @@ public class ClientController implements Initializable {
         scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
+
     }
+
 
     @FXML
     public void switchSceneToProductViev(ActionEvent event) throws IOException {
@@ -280,7 +332,7 @@ public class ClientController implements Initializable {
             this.orderList = orderList;
             this.orderId = id;
 
-            StringBuilder productNameText= new StringBuilder();
+            StringBuilder productNameText = new StringBuilder();
             StringBuilder productPriceText = new StringBuilder();
             StringBuilder productCountText = new StringBuilder();
 
@@ -295,10 +347,10 @@ public class ClientController implements Initializable {
             productNameText.append("Products name \n");
             productPriceText.append("Price \n");
             productCountText.append("Count \n");
-            for(int i =0; i < orderList.size(); i++){
+            for (int i = 0; i < orderList.size(); i++) {
                 productNameText.append(orderList.get(i).getName());
                 productNameText.append("\n");
-                productPriceText.append(BigDecimal.valueOf(orderList.get(i).getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP)+"$");
+                productPriceText.append(BigDecimal.valueOf(orderList.get(i).getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP) + "$");
                 productPriceText.append("\n");
                 productCountText.append(orderList.get(i).getCount());
                 productCountText.append("\n");
@@ -326,7 +378,7 @@ public class ClientController implements Initializable {
             HBox hbox = new HBox(70);
             hbox.setAlignment(Pos.CENTER_LEFT);
 
-            hbox.getChildren().addAll(productName,spacer1,productPrice,spacer2,productCount);
+            hbox.getChildren().addAll(productName, spacer1, productPrice, spacer2, productCount);
             this.getChildren().add(hbox);
         }
 
@@ -499,6 +551,36 @@ public class ClientController implements Initializable {
 
             return prod;
         }
+
+    }
+
+
+    private void checkLogin() {
+        JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("toSend", true);
+        jsonToSend.put("operation", "checkLogin");
+        jsonToSend.put("login", login.getText());
+        jsonToSend.put("password", password.getText());
+        ClientApp.controllerToClient(jsonToSend);
+
+
+        while (true) {
+            if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                boolean orderedMessage = ClientApp.ClientToController().optBoolean("answerLogin");
+                if (orderedMessage) {
+                    System.out.println("You are logged");
+                    isLogged = true;
+                    break;
+
+                } else {
+                    System.out.println("Wrong password or login");
+
+                    break;
+                }
+
+            }
+        }
+
 
     }
 
