@@ -25,7 +25,12 @@ What you need to run a programme:
   
 1. In PostgreSQL tool ( for example pgAdmin ) you need to create database - paste text that is in ,,Create database PSQL.txt,,, run it and create user.  
 [Create database PSQL.txt](https://github.com/user-attachments/files/18719528/Create.database.PSQL.txt)  
-2. In java idee you need to load project and in hibernate.cfg.xml change connections property:  
+2. In java idee you need to load project and in hibernate.cfg.xml change connections property:
+ ```
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/postgres</property>,,  
+        <property name="hibernate.connection.username">postgres</property>  
+        <property name="hibernate.connection.password">filip</property>
+   ```
 
 
 How it works:  
