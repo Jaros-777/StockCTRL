@@ -62,7 +62,10 @@ public class ServerApp extends Application {
             //serverSocket.close();
         } catch (SocketException e) {
             if (!isServerRunning && serverSocket.isClosed()) {
-                PsqlDB.closeHibernateSession();
+                if (PsqlDB.getSession() != null) {
+
+                    PsqlDB.closeHibernateSession();
+                }
                 HibernateUtil.shutdown();
                 System.out.println("-- Server close --");
 

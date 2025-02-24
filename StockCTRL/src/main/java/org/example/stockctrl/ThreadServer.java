@@ -31,30 +31,39 @@ public class ThreadServer {
                 String data = br.readLine();
                 JSONObject json = new JSONObject(data);
                 System.out.println("I order a data: " + json.toString());
+                if (Objects.equals(json.optString("operation"), "changeUserDetails")) {
+                    changeUserDetails( json.optJSONObject("userDetails"));
+                }
+                if (Objects.equals(json.optString("operation"), "giveUserDetails")) {
+                    giveUserDetails(bw, json.optInt("userId"));
+                }
                 if (Objects.equals(json.optString("operation"), "giveProductsList")) {
                     inquiryProductList(bw);
                 }
                 if (Objects.equals(json.optString("operation"), "giveCartList")) {
-                    inquiryCartList(bw);
+                    inquiryCartList(bw, json.optInt("userId"));
                 }
                 if (Objects.equals(json.optString("operation"), "addProductToCart")) {
-                    updateCartList( json.optString("product"));
+                    updateCartList(json.optString("product"), json.optInt("userId"));
                 }
                 if (Objects.equals(json.optString("operation"), "deleteProductFromCart")) {
                     JSONObject bufor = new JSONObject(json.optString("productId"));
-                    deleteProductFromCartList(bw, (int)  bufor.get("id"));
+                    deleteProductFromCartList(bw, (int) bufor.get("id"), json.optInt("userId"));
                 }
                 if (Objects.equals(json.optString("operation"), "buy")) {
-                    updateOrderList( json.optString("order"), bw);
+                    updateOrderList(json.optString("order"), bw);
                 }
                 if (Objects.equals(json.optString("operation"), "deleteCartList")) {
-                    deleteCartList(bw);
+                    deleteCartList(bw, json.optInt("userId"));
                 }
                 if (Objects.equals(json.optString("operation"), "giveOrdersList")) {
-                    inquiryOrdersList(bw);
+                    inquiryOrdersList(bw, json.optInt("userId"));
                 }
                 if (Objects.equals(json.optString("operation"), "checkLogin")) {
                     checkLogin(bw, json);
+                }
+                if (Objects.equals(json.optString("operation"), "registerUser")) {
+                    registerUser(bw, json);
                 }
             }
             socket.close();
@@ -64,29 +73,66 @@ public class ThreadServer {
             e.printStackTrace();
         }
     }
-    private static void checkLogin(BufferedWriter bw, JSONObject orderedJson){
 
-        String login = orderedJson.optString("login");
-        String password = orderedJson.optString("password");
+    private static void changeUserDetails(JSONObject userDetails) {
+        JSONObject newUserDetails = new JSONObject();
+        newUserDetails.put("address", userDetails.optString("address"));
 
 
-        List<String> queryLogin = PsqlDB.sendQuery("SELECT password FROM DataBaseUsers WHERE login = '" +login + "'", String.class);
+        PsqlDB.updateCartList("UPDATE users SET name = '" + userDetails.optString("name") + "' WHERE id = "+userDetails.optInt("id"));
+        PsqlDB.updateCartList("UPDATE users SET surname = '" + userDetails.optString("surname") + "' WHERE id = "+userDetails.optInt("id"));
+        PsqlDB.updateCartList("UPDATE users SET address = '" + userDetails.optString("address") + "' WHERE id = "+userDetails.optInt("id"));
+
+    }
+
+    private static void giveUserDetails(BufferedWriter bw, int userId) {
+
+        //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
+        List<String> queryCartList = PsqlDB.sendQuery("SELECT name,surname,address FROM DataBaseUsers WHERE id = "+userId, String.class);
+
+
+        System.out.println("Data from database: " + queryCartList.get(0));
+
+//        JSONObject toSend = new JSONObject();
+//
+//
+//        toSend.put("toSend", false);
+//        toSend.put("name", queryCartList.get(0));
+//        System.out.println("Send to client: " + toSend);
+//        try {
+//            bw.write(toSend.toString());
+//            bw.newLine();
+//            bw.flush();
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+
+
+    }
+
+    private static void registerUser(BufferedWriter bw, JSONObject orderedJson) {
+
+//        PsqlDB.updateCartList("INSERT INTO DataBaseUser (userName, userSurname,password, login,cartlist)" +
+//                " VALUES ( userName= '" + orderedJson.optString("userName") + "', userSurname = '"
+//                + orderedJson.optString("userSurname") + "', password='" + orderedJson.optString("userPassword") +
+//                "', login= '" + orderedJson.optString("userLogin") + "', cartlist = '[null]'");
+        PsqlDB.updateCartList("INSERT INTO users (name, surname,password, login,cartlist, address)" +
+                " VALUES ('" + orderedJson.optString("userName") + "','"
+                + orderedJson.optString("userSurname") + "','" + orderedJson.optString("userPassword") +
+                "','" + orderedJson.optString("userLogin") + "','[]', '[]')");
+
+        List<String> queryUserId = PsqlDB.sendQuery
+                ("SELECT id FROM DataBaseUsers WHERE login = '" + orderedJson.optString("userLogin")
+                        + "' AND password = '" + orderedJson.optString("userPassword")
+                        + "' AND userName = '" + orderedJson.optString("userName")
+                        + "' AND userSurname = '" + orderedJson.optString("userSurname") + "'", String.class);
 
 
         JSONObject toSend = new JSONObject();
         toSend.put("toSend", false);
-        if(queryLogin.isEmpty()){
-            toSend.put("answerLogin", false);
-        }else{
-            //System.out.println(queryLogin.get(0));
-            //System.out.println(password);
-            if (Objects.equals(queryLogin.get(0), password)){
-                toSend.put("answerLogin", true);
-            }else{
-                toSend.put("answerLogin", false);
-            }
-        }
 
+        //toSend.put("userId", queryUserId.get(0));
 
 
         System.out.println("Send to client: " + toSend);
@@ -101,15 +147,53 @@ public class ThreadServer {
 
 
     }
-    private static void inquiryOrdersList(BufferedWriter bw){
+
+    private static void checkLogin(BufferedWriter bw, JSONObject orderedJson) {
+
+        String login = orderedJson.optString("login");
+        String password = orderedJson.optString("password");
+
+
+        List<String> queryLogin = PsqlDB.sendQuery("SELECT password FROM DataBaseUsers WHERE login = '" + login + "'", String.class);
+
+
+        JSONObject toSend = new JSONObject();
+        toSend.put("toSend", false);
+        if (queryLogin.isEmpty()) {
+            toSend.put("answerLogin", false);
+        } else {
+            if (Objects.equals(queryLogin.get(0), password)) {
+                List<Integer> userId = PsqlDB.sendQuery("SELECT id FROM DataBaseUsers WHERE login = '" + login + "' AND password = '"+password+"'", int.class);
+                toSend.put("answerLogin", true);
+                toSend.put("userId", userId.get(0));
+            } else {
+                toSend.put("answerLogin", false);
+            }
+        }
+
+
+        System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+    private static void inquiryOrdersList(BufferedWriter bw, int userId) {
 
         //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
-        List<DataBaseOrders> query = PsqlDB.sendQuery("SELECT o FROM DataBaseOrders o WHERE o.userId = 1", DataBaseOrders.class);
+        List<DataBaseOrders> query = PsqlDB.sendQuery("SELECT o FROM DataBaseOrders o WHERE o.userId = "+userId, DataBaseOrders.class);
 
         JSONArray orderListJson = new JSONArray();
 
 
-        for(int i =0; i< query.size(); i++){
+        for (int i = 0; i < query.size(); i++) {
 
             JSONObject item = new JSONObject();
             item.put("id", query.get(i).getId());
@@ -119,7 +203,7 @@ public class ThreadServer {
 
             orderListJson.put(item);
         }
-        System.out.println("Data from database: "+ orderListJson);
+        System.out.println("Data from database: " + orderListJson);
 
         JSONObject toSend = new JSONObject();
 
@@ -138,13 +222,13 @@ public class ThreadServer {
 
 
     }
-    private static void deleteCartList(BufferedWriter bw){
+
+    private static void deleteCartList(BufferedWriter bw, int userId) {
 
         JSONArray emptyCartList = new JSONArray();
 
 
-
-        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + emptyCartList+ "' WHERE id = 1");
+        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + emptyCartList + "' WHERE id = "+ userId);
 
         JSONObject toSend = new JSONObject();
 
@@ -161,15 +245,16 @@ public class ThreadServer {
         }
 
     }
-    private static void updateOrderList( String order, BufferedWriter bw){
+
+    private static void updateOrderList(String order, BufferedWriter bw) {
 
 
         JSONObject newOrder = new JSONObject(order);
 
-        System.out.println("New order" +  newOrder);
+        System.out.println("New order" + newOrder);
 
 
-        PsqlDB.addOrder(newOrder.optInt("userId"),newOrder.optString("status"),newOrder.optJSONArray("orderList"));
+        PsqlDB.insert(newOrder.optInt("userId"), newOrder.optString("status"), newOrder.optJSONArray("orderList"));
 
         JSONObject toSend = new JSONObject();
 
@@ -187,28 +272,29 @@ public class ThreadServer {
 
 
     }
-    private static void deleteProductFromCartList(BufferedWriter bw, int id){
+
+    private static void deleteProductFromCartList(BufferedWriter bw,int id, int userId) {
         //System.out.println(id);
 
-        List<String> actualCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = 1", String.class);
+        List<String> actualCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = "+userId, String.class);
 
         JSONArray oldCartList = new JSONArray(actualCartList.get(0));
 
 
-        for(int i =0; i < oldCartList.length(); i++){
+        for (int i = 0; i < oldCartList.length(); i++) {
             JSONObject currentItem = oldCartList.getJSONObject(i);
             JSONObject currentProduct = currentItem.getJSONObject("product");
             //System.out.println(currentProduct.optString("id"));
             //System.out.println(id);
             //System.out.println(Objects.equals(currentProduct.optString("id"), id+""));
 
-            if(Objects.equals(currentProduct.optString("id"), id+"")){
+            if (Objects.equals(currentProduct.optString("id"), id + "")) {
                 //System.out.println("Before " + oldCartList);
 
-                if((int) currentItem.get("count") > 1){
+                if ((int) currentItem.get("count") > 1) {
                     currentItem.put("count", (int) currentItem.get("count") - 1);
                     System.out.println("Decrease product count");
-                }else{
+                } else {
                     oldCartList.remove(i);
                     System.out.println("Remove product");
                 }
@@ -221,13 +307,13 @@ public class ThreadServer {
             }
         }
 
-        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + oldCartList+ "' WHERE id = 1");
+        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + oldCartList + "' WHERE id = "+userId);
 
         JSONObject toSend = new JSONObject();
 
 
         toSend.put("toSend", false);
-       // System.out.println("Send to client: " + toSend);
+        // System.out.println("Send to client: " + toSend);
         try {
             bw.write(toSend.toString());
             bw.newLine();
@@ -239,9 +325,9 @@ public class ThreadServer {
 
     }
 
-    private static void updateCartList( String product){
+    private static void updateCartList(String product, int userId) {
 
-        List<String> actualCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = 1", String.class);
+        List<String> actualCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = "+userId, String.class);
 
         JSONArray oldCartList = new JSONArray(actualCartList.get(0));
         //System.out.println("Old " + oldCartList);
@@ -249,13 +335,13 @@ public class ThreadServer {
         JSONObject newProduct = new JSONObject(product);
         Boolean incrementCount = false;
 
-        for(int i =0; i < oldCartList.length(); i++){
+        for (int i = 0; i < oldCartList.length(); i++) {
             JSONObject currentItem = oldCartList.getJSONObject(i);
             JSONObject currentProduct = currentItem.getJSONObject("product");
 
-            if(Objects.equals(currentProduct.optString("id"), newProduct.optString("id"))){
+            if (Objects.equals(currentProduct.optString("id"), newProduct.optString("id"))) {
 
-                incrementCount=true;
+                incrementCount = true;
                 currentItem.put("count", (int) currentItem.get("count") + 1);
                 System.out.println("Increase product count");
 
@@ -264,7 +350,7 @@ public class ThreadServer {
             }
         }
 
-        if(!incrementCount){
+        if (!incrementCount) {
             JSONObject newProductToCart = new JSONObject();
             newProductToCart.put("count", 1);
             newProductToCart.put("product", newProduct);
@@ -274,14 +360,14 @@ public class ThreadServer {
 
         }
 
-        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + oldCartList+ "' WHERE id = 1");
+        PsqlDB.updateCartList("UPDATE users SET cartlist = '" + oldCartList + "' WHERE id = "+userId);
 
     }
 
-    private static void inquiryCartList(BufferedWriter bw){
+    private static void inquiryCartList(BufferedWriter bw, int userId) {
 
         //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
-        List<String> queryCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = 1", String.class);
+        List<String> queryCartList = PsqlDB.sendQuery("SELECT cartList FROM DataBaseUsers WHERE id = "+userId, String.class);
 
 
 //        for(int i =0; i< queryJsonCartList.size(); i++){
@@ -291,7 +377,7 @@ public class ThreadServer {
 ////            item.put("price", queryProductPrice.get(i));
 ////            productListJson.put(item);
 //        }
-        System.out.println("Data from database: "+ queryCartList.get(0));
+        System.out.println("Data from database: " + queryCartList.get(0));
 
         JSONObject toSend = new JSONObject();
 
@@ -311,7 +397,7 @@ public class ThreadServer {
 
     }
 
-    private static void inquiryProductList(BufferedWriter bw){
+    private static void inquiryProductList(BufferedWriter bw) {
 
         //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
         List<Integer> queryProductId = PsqlDB.sendQuery("SELECT id FROM DataBaseProducts", Integer.class);
@@ -321,14 +407,14 @@ public class ThreadServer {
         JSONArray productListJson = new JSONArray();
 
 
-        for(int i =0; i< queryProductName.size(); i++){
+        for (int i = 0; i < queryProductName.size(); i++) {
             JSONObject item = new JSONObject();
             item.put("id", queryProductId.get(i));
             item.put("name", queryProductName.get(i));
             item.put("price", queryProductPrice.get(i));
             productListJson.put(item);
         }
-        System.out.println("Data from database: "+ productListJson);
+        System.out.println("Data from database: " + productListJson);
 
         JSONObject toSend = new JSONObject();
 

@@ -43,6 +43,15 @@ public class ClientController implements Initializable {
     private PasswordField password;
     private boolean isLogged = false;
     @FXML
+    private TextField registerUserName;
+    @FXML
+    private TextField registerUserSurname;
+    @FXML
+    private TextField registerUserLogin;
+    @FXML
+    private TextField registerUserPassword;
+
+    @FXML
     private Button cartBtn = new Button("Cart (0)");
     @FXML
     private ListView<ProductFX> productsList = new ListView<>();
@@ -63,6 +72,41 @@ public class ClientController implements Initializable {
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
 
+    }
+    @FXML
+    public void switchSceneToRegistrationViev(ActionEvent event) throws IOException {
+        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("register-view.fxml"));
+        Scene scene = new Scene(main.load());
+        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.setScene(scene);
+
+    }
+    @FXML
+    public void switchSceneToRegistrationVievREGISTER(ActionEvent event) throws IOException {
+        FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
+        Scene waitingScene = new Scene(waitingLoader.load());
+        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.setScene(waitingScene);
+
+        CompletableFuture.runAsync(() -> {
+            registerUser();
+
+            Platform.runLater(() -> {
+                    try {
+                        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
+                        Scene scene = new Scene(main.load());
+                        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                        stage.setScene(scene);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+            });
+
+
+        });
     }
 
     @FXML
@@ -194,10 +238,31 @@ public class ClientController implements Initializable {
 
     @FXML
     public void switchSceneToSettingsViev(ActionEvent event) throws IOException {
-        FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("settings-view.fxml"));
-        Scene scene = new Scene(main.load());
+        FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
+        Scene waitingScene = new Scene(waitingLoader.load());
+        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.setScene(scene);
+        stage.setScene(waitingScene);
+
+
+        CompletableFuture.runAsync(() -> {
+            loadUserDetails();
+
+
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("settings-view.fxml"));
+                    Scene scene = new Scene(main.load());
+                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                   // ClientController controller = main.getController();
+                    //controller.updateCartList(cartListData); // Make sure to pass the data stage.setScene(scene);
+                    stage.setScene(scene);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        });
     }
 
     @FXML
@@ -250,7 +315,7 @@ public class ClientController implements Initializable {
             json.put("operation", "buy");
 
             JSONObject orderList = new JSONObject();
-            orderList.put("userId", 1);
+            orderList.put("userId", ClientApp.getUserID());
             orderList.put("date", LocalDate.now());
             orderList.put("status", "to pack");
 
@@ -275,6 +340,7 @@ public class ClientController implements Initializable {
                     JSONObject jsonToSend = new JSONObject();
                     jsonToSend.put("toSend", true);
                     jsonToSend.put("operation", "deleteCartList");
+                    jsonToSend.put("userId", ClientApp.getUserID());
                     ClientApp.controllerToClient(jsonToSend);
 
                     while (true) {
@@ -302,13 +368,35 @@ public class ClientController implements Initializable {
     }
 
     @FXML
-    public void changeUserDetails(ActionEvent e) {
+    public void loadUserDetails() {
+        System.out.println("Start downloading user details from server");
         JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("toSend", true);
+        jsonToSend.put("operation", "giveUserDetails");
+        ClientApp.controllerToClient(jsonToSend);
+
+        while (true) {
+            if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                JSONObject userDetails = new JSONObject(ClientApp.ClientToController().optString("userDetails"));
+                System.out.println("Received user details: " + userDetails);
+                userName.setText(userDetails.optString("name"));
+                userSurname.setText(userDetails.optString("surname"));
+                userAddress.setText(userDetails.optString("address"));
+                break;
+
+            }
+        }
+
+    }
+
+    @FXML
+    public void changeUserDetails(ActionEvent e) {
+         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
         jsonToSend.put("operation", "changeUserDetails");
 
         JSONObject userDetails = new JSONObject();
-        userDetails.put("id", 2);
+        userDetails.put("id", ClientApp.getUserID());
         userDetails.put("name", userName.getText());
         userDetails.put("surname", userSurname.getText());
         userDetails.put("address", userAddress.getText());
@@ -425,6 +513,7 @@ public class ClientController implements Initializable {
                     JSONObject jsonToSend = new JSONObject();
                     jsonToSend.put("toSend", true);
                     jsonToSend.put("operation", "addProductToCart");
+                    jsonToSend.put("userId",  ClientApp.getUserID());
                     jsonToSend.put("product", product.toString());
                     //System.out.println(jsonToSend);
                     //System.out.println("przed");
@@ -496,6 +585,7 @@ public class ClientController implements Initializable {
                     JSONObject jsonToSend = new JSONObject();
                     jsonToSend.put("toSend", true);
                     jsonToSend.put("operation", "deleteProductFromCart");
+                    jsonToSend.put("userId", ClientApp.getUserID());
                     jsonToSend.put("productId", productId.toString());
                     //System.out.println(jsonToSend);
                     //System.out.println("przed");
@@ -554,7 +644,27 @@ public class ClientController implements Initializable {
 
     }
 
+    private void registerUser() {
+        JSONObject jsonToSend = new JSONObject();
+        jsonToSend.put("toSend", true);
+        jsonToSend.put("operation", "registerUser");
+        jsonToSend.put("userName", registerUserName.getText());
+        jsonToSend.put("userSurname", registerUserSurname.getText());
+        jsonToSend.put("userLogin", registerUserLogin.getText());
+        jsonToSend.put("userPassword", registerUserPassword.getText());
+        ClientApp.controllerToClient(jsonToSend);
 
+
+        while (true) {
+            if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
+                System.out.println("Successful registration");
+                break;
+
+            }
+        }
+
+
+    }
     private void checkLogin() {
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
@@ -570,6 +680,8 @@ public class ClientController implements Initializable {
                 if (orderedMessage) {
                     System.out.println("You are logged");
                     isLogged = true;
+                    ClientApp.setUserID(Integer.parseInt(ClientApp.ClientToController().optString("userId")));
+                    System.out.println("User id: " + ClientApp.getUserID());
                     break;
 
                 } else {
@@ -589,6 +701,7 @@ public class ClientController implements Initializable {
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
         jsonToSend.put("operation", "giveOrdersList");
+        jsonToSend.put("userId", ClientApp.getUserID());
         ClientApp.controllerToClient(jsonToSend);
 
 
@@ -652,7 +765,7 @@ public class ClientController implements Initializable {
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
         jsonToSend.put("operation", "giveCartList");
-        jsonToSend.put("userId", 1);
+        jsonToSend.put("userId", String.valueOf( ClientApp.getUserID()));
         ClientApp.controllerToClient(jsonToSend);
         //System.out.println("Json sended");
 

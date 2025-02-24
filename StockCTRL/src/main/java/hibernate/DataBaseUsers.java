@@ -22,7 +22,11 @@ public class DataBaseUsers {
     @Column
     private String order;
     @Column
+    private String password;
+    @Column
     private String login;
+    @Column
+    private String cartList;
 
     public String getLogin() {
         return login;
@@ -40,8 +44,7 @@ public class DataBaseUsers {
         this.password = password;
     }
 
-    @Column
-    private String password;
+
 
     public String getCartList() {
         return cartList;
@@ -51,8 +54,7 @@ public class DataBaseUsers {
         this.cartList = cartList;
     }
 
-    @Column
-    private String cartList;
+
 
     public String getOrder() {
         return order;

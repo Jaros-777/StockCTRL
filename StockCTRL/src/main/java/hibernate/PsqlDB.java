@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PsqlDB {
+
+
     private static Session session;
     public static void main(String[] args){
         List<Integer> data = sendQuery("SELECT id FROM DataBaseProducts", Integer.class);
@@ -23,7 +25,7 @@ public class PsqlDB {
         System.out.println(sendQuery("SELECT name FROM DataBaseProducts", String.class));
     }
 
-    public static void addOrder( int userId, String status, JSONArray products){
+    public static void insert( int userId, String status, JSONArray products){
         Session session = HibernateUtil.getSession();
         Transaction transaction = null;
 
@@ -98,5 +100,8 @@ public class PsqlDB {
 
     public static  void closeHibernateSession(){
         session.close();
+    }
+    public static Session getSession() {
+        return session;
     }
 }

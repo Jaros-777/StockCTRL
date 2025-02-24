@@ -35,7 +35,7 @@
             <Font size="15.0" />
          </font>
       </Button>
-      <Button alignment="CENTER" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" text="Register" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="7">
+      <Button alignment="CENTER" mnemonicParsing="false" onAction="#switchSceneToRegistrationViev" prefHeight="40.0" prefWidth="120.0" text="Register" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="7">
          <font>
             <Font size="15.0" />
          </font>
