@@ -1,5 +1,5 @@
 # StockCTRL  
-IN PROGRESS  
+IN DEVELOPMENT  
 This is a computer application created to pass a university course in Java.  
 Requirements:  
 - Client - server  
@@ -23,19 +23,17 @@ What you need to run a programme:
 - Java idea (e.g. Intelij IDEA)  
 - PostgreSQL database  
   
-1. In PostgreSQL tool ( for example pgAdmin ) you need to create database - paste text that is in ,,Create database PSQL.txt,,, run it and create user.  
-[Create.database.PSQ.txt…]()
+1️⃣. In PostgreSQL tool ( for example pgAdmin ) you need to create database - paste text that is in ,,Create database PSQL.txt,,, run it and create user.  
 
-
-3. In java idee you need to load project and in hibernate.cfg.xml change connections property:
+2️⃣. In java idee you need to load project and in hibernate.cfg.xml change connections property:
  ```
-        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/postgres</property>,,  
-        <property name="hibernate.connection.username">postgres</property>  
-        <property name="hibernate.connection.password">filip</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/postgres</property>  
+        <property name="hibernate.connection.username">user_username</property>  
+        <property name="hibernate.connection.password">user_password</property>
    ```
 
 
-How it works:  
+🚀 How it works:  
 - In the first step you run a server - it automatically creates a local connection ( socket ) waiting for a client.  
 - In the next step you run the client - it automatically connects to the server.  
 When checking products, shopping cart, orders, address changes, the program communicates with the PostgreSQL database on your computer  
