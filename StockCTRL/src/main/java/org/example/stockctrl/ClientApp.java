@@ -56,7 +56,6 @@ public class ClientApp extends Application {
 
         stage.setTitle("StockCTRL Client");
         stage.setScene(scene);
-
         stage.show();
 
         stage.setOnCloseRequest(event -> {

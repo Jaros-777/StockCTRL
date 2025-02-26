@@ -75,6 +75,24 @@ public class PsqlDB {
 
     }
 
+    public static List<Object[]> sendNativeQuery(String queryName) {
+
+
+        session = HibernateUtil.getSession();
+        List<Object[]> queryResult = new ArrayList<>();
+
+        try{
+            Query<Object[]> query = session.createNativeQuery(queryName);
+            queryResult = query.getResultList();
+
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return queryResult;
+
+    }
+
     public static <T> List<T> sendQuery(String queryName, Class<T> type) {
 
 
@@ -82,17 +100,12 @@ public class PsqlDB {
         List<T> queryResult = new ArrayList<>();
 
         try{
-//            Query<DataBaseUsers> query = session.createQuery("FROM DataBaseUsers", DataBaseUsers.class);
-//            List<DataBaseUsers> users = query.getResultList();
             Query<T> query = session.createQuery(queryName, type);
             queryResult = query.getResultList();
 
 
         }catch(Exception e){
             e.printStackTrace();
-        }finally {
-            //session.close();
-           // HibernateUtil.shutdown();
         }
         return queryResult;
 

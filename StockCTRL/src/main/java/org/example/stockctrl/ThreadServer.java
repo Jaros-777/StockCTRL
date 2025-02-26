@@ -1,6 +1,7 @@
 package org.example.stockctrl;
 
 import hibernate.DataBaseOrders;
+import hibernate.DataBaseUsers;
 import hibernate.PsqlDB;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,27 +87,27 @@ public class ThreadServer {
     }
 
     private static void giveUserDetails(BufferedWriter bw, int userId) {
-
-        //List<String> query = PsqlDB.sendQuery("DataBaseUsers", "WHERE userName = (SELECT userName from DataBaseUsers WHERE userName ='Filip')");
-        List<String> queryCartList = PsqlDB.sendQuery("SELECT name,surname,address FROM DataBaseUsers WHERE id = "+userId, String.class);
+        List<DataBaseUsers> queryUserDetails = PsqlDB.sendQuery("SELECT o FROM DataBaseUsers o  WHERE o.id = "+userId, DataBaseUsers.class );
 
 
-        System.out.println("Data from database: " + queryCartList.get(0));
+        System.out.println("Data from database: " + queryUserDetails);
 
-//        JSONObject toSend = new JSONObject();
-//
-//
-//        toSend.put("toSend", false);
-//        toSend.put("name", queryCartList.get(0));
-//        System.out.println("Send to client: " + toSend);
-//        try {
-//            bw.write(toSend.toString());
-//            bw.newLine();
-//            bw.flush();
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        JSONObject toSend = new JSONObject();
+
+
+        toSend.put("toSend", false);
+        toSend.put("name", queryUserDetails.get(0).getUserName());
+        toSend.put("surname", queryUserDetails.get(0).getUserSurname());
+        toSend.put("address", queryUserDetails.get(0).getAddress());
+        System.out.println("Send to client: " + toSend);
+        try {
+            bw.write(toSend.toString());
+            bw.newLine();
+            bw.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
 
     }

@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 public class ClientController implements Initializable {
 
     @FXML
-    private TextField userName;
+    private TextField userName = new TextField("Name");
     @FXML
     private TextField userSurname;
     @FXML
@@ -246,7 +246,6 @@ public class ClientController implements Initializable {
 
 
         CompletableFuture.runAsync(() -> {
-            loadUserDetails();
 
 
             Platform.runLater(() -> {
@@ -255,8 +254,8 @@ public class ClientController implements Initializable {
                     Scene scene = new Scene(main.load());
                     scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
                     //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                   // ClientController controller = main.getController();
-                    //controller.updateCartList(cartListData); // Make sure to pass the data stage.setScene(scene);
+                    ClientController controller = main.getController();
+                    controller.loadUserDetails(); // Make sure to pass the data stage.setScene(scene);
                     stage.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -373,15 +372,16 @@ public class ClientController implements Initializable {
         JSONObject jsonToSend = new JSONObject();
         jsonToSend.put("toSend", true);
         jsonToSend.put("operation", "giveUserDetails");
+        jsonToSend.put("userId", ClientApp.getUserID());
         ClientApp.controllerToClient(jsonToSend);
 
         while (true) {
             if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
-                JSONObject userDetails = new JSONObject(ClientApp.ClientToController().optString("userDetails"));
-                System.out.println("Received user details: " + userDetails);
-                userName.setText(userDetails.optString("name"));
-                userSurname.setText(userDetails.optString("surname"));
-                userAddress.setText(userDetails.optString("address"));
+                System.out.println("Received user details: " + ClientApp.ClientToController());
+
+                userName.setText(ClientApp.ClientToController().optString("name"));
+                userSurname.setText(ClientApp.ClientToController().optString("surname"));
+                userAddress.setText(ClientApp.ClientToController().optString("address"));
                 break;
 
             }
