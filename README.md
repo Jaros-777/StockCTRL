@@ -15,7 +15,7 @@ Target application performance and functionality:
 
 🙋🏻‍♂️ Client:  
 - ✅ Login/registration form  
-- ⏳ Change of user address  
+- ✅ Change of user address  
 - ✅ Easy to buy products ( without finalizing the transaction )  
 - ✅ insight into your orders  
 
