@@ -8,7 +8,7 @@ This is a computer application created to pass a university course in Java.
 
 In this project I used JavaFX, hibernate, PostgreSQL, socket-based client- server.  
 
-🎯 Target application performance and functionality:  
+🎯 Client targets application performance and functionality:  
 - ✅ Login/registration form  
 - ✅ Change of user address  
 - ✅ Easy to buy products ( without finalizing the transaction )  
