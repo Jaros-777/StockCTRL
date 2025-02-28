@@ -1,19 +1,14 @@
 # StockCTRL  
 IN DEVELOPMENT  
 This is a computer application created to pass a university course in Java.  
-Requirements:  
+📋 Requirements:  
 - Client - server  
 - Connection to the database  
 - Graphical interface  
 
 In this project I used JavaFX, hibernate, PostgreSQL, socket-based client- server.  
 
-Target application performance and functionality:  
-💼 Server:  
-- ⏳ Ability to check current orders   
-- ⏳ Checking current inventory
-
-🙋🏻‍♂️ Client:  
+🎯 Target application performance and functionality:  
 - ✅ Login/registration form  
 - ✅ Change of user address  
 - ✅ Easy to buy products ( without finalizing the transaction )  
@@ -40,7 +35,7 @@ When checking products, shopping cart, orders, address changes, the program comm
   
 In the terminal you can see what just happened in the programme.  
   
-Once this is done, you can use the programme to  
+🏁 Once this is done, you can use the programme to  
 - Login or create a new account  
 - Check available products  
 - Add products to your basket  
