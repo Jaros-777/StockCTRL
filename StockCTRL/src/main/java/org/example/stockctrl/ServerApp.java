@@ -28,7 +28,7 @@ public class ServerApp extends Application {
         stage.getIcons().add(image);
         stage.setTitle("StockCTRL Server");
         stage.setScene(scene);
-        stage.show();
+        //stage.show();
 
         stage.setOnCloseRequest(event -> {
             isServerRunning = false;
