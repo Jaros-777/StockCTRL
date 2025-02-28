@@ -86,7 +86,7 @@ public class ThreadServer {
 
     }
 
-    private static void giveUserDetails(BufferedWriter bw, int userId) {
+    private static void giveUserDetails(BufferedWriter bw, int userId)  {
         List<DataBaseUsers> queryUserDetails = PsqlDB.sendQuery("SELECT o FROM DataBaseUsers o  WHERE o.id = "+userId, DataBaseUsers.class );
 
 

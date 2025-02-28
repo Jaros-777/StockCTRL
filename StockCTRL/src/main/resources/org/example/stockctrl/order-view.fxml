@@ -21,12 +21,12 @@
     </rowConstraints>
     <children>
         <Button mnemonicParsing="false" onAction="#switchSceneToMainViev" text="Back" textAlignment="CENTER" GridPane.halignment="LEFT" GridPane.valignment="CENTER" />
-        <Label alignment="CENTER" prefHeight="48.0" prefWidth="152.0" text="Order List" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+        <Label alignment="CENTER" prefHeight="48.0" prefWidth="152.0" text="Order List" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
             <font>
                 <Font size="18.0" />
             </font>
         </Label>
-      <ListView fx:id="orderList" prefHeight="60.0" prefWidth="100.0" GridPane.columnSpan="3" GridPane.rowIndex="2" GridPane.rowSpan="3" />
+      <ListView fx:id="orderList" prefHeight="60.0" prefWidth="100.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4" />
     </children>
     <padding>
         <Insets left="50.0" right="50.0" />

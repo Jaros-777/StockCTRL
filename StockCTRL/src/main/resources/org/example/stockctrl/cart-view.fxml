@@ -21,18 +21,18 @@
   </rowConstraints>
    <children>
       <Button mnemonicParsing="false" onAction="#switchSceneToProductViev" text="Back" />
-      <Label alignment="CENTER" contentDisplay="CENTER" text="Cart" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+      <Label alignment="CENTER" contentDisplay="CENTER" text="Cart" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <ListView fx:id="cartList" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="2" GridPane.rowSpan="3" />
+      <ListView fx:id="cartList" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4" />
       <Button mnemonicParsing="false" onAction="#buyProducts" text="Buy" GridPane.columnIndex="2" GridPane.rowIndex="5">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <Label text="SUM: 200$" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
+      <Label fx:id="cartListSum" text="SUM: 200$" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>

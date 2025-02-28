@@ -21,27 +21,17 @@
   </rowConstraints>
    <children>
       <Button mnemonicParsing="false" onAction="#switchSceneToMainViev" text="Back" textAlignment="CENTER" GridPane.halignment="LEFT" GridPane.valignment="CENTER" />
-      <Label alignment="CENTER" prefHeight="48.0" prefWidth="152.0" text="Products List" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+      <Label alignment="CENTER" prefHeight="48.0" prefWidth="152.0" text="Products List" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Button fx:id="cartBtn" mnemonicParsing="false" onAction="#switchSceneToCartViev" text="Cart (0)" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
+      <Button fx:id="cartBtn" mnemonicParsing="false" onAction="#switchSceneToCartViev" text="Cart" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <Label alignment="CENTER" prefHeight="24.0" prefWidth="58.0" text="Total" textAlignment="CENTER" textFill="WHITE" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.valignment="CENTER">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-      <Label prefHeight="29.0" prefWidth="103.0" text="200$" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="5" GridPane.valignment="CENTER">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-      <ListView fx:id="productsList" prefHeight="60.0" prefWidth="100.0" GridPane.columnSpan="3" GridPane.rowIndex="2" GridPane.rowSpan="3" />
+      <ListView fx:id="productsList" prefHeight="60.0" prefWidth="100.0" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="4" />
    </children>
    <padding>
       <Insets left="50.0" right="50.0" />

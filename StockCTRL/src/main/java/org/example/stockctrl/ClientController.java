@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 public class ClientController implements Initializable {
 
     @FXML
-    private TextField userName = new TextField("Name");
+    private TextField userName = new TextField();
     @FXML
     private TextField userSurname;
     @FXML
@@ -53,6 +53,8 @@ public class ClientController implements Initializable {
 
     @FXML
     private Button cartBtn = new Button("Cart (0)");
+    @FXML
+    private Label cartListSum = new Label();
     @FXML
     private ListView<ProductFX> productsList = new ListView<>();
     private final ObservableList<ProductFX> productsListData = FXCollections.observableArrayList();
@@ -175,7 +177,7 @@ public class ClientController implements Initializable {
 
 
         CompletableFuture.runAsync(() -> {
-            inquiryProductsList();
+            //inquiryProductsList();
 
 
             Platform.runLater(() -> {
@@ -185,7 +187,8 @@ public class ClientController implements Initializable {
                     scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
                     //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                     ClientController controller = main.getController();
-                    controller.updateProductsList(productsListData); // Make sure to pass the data stage.setScene(scene);
+                    //controller.updateProductsList(productsListData); // Make sure to pass the data stage.setScene(scene);
+                    controller.inquiryProductsList();
                     stage.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -211,7 +214,7 @@ public class ClientController implements Initializable {
 
 
         CompletableFuture.runAsync(() -> {
-            inquiryOrderList();
+            //inquiryOrderList();
 
 
             Platform.runLater(() -> {
@@ -221,7 +224,8 @@ public class ClientController implements Initializable {
                     scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
                     //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                     ClientController controller = main.getController();
-                    controller.updateOrderList(orderListData); // Make sure to pass the data stage.setScene(scene);
+                    //controller.updateOrderList(orderListData); // Make sure to pass the data stage.setScene(scene);
+                    controller.inquiryOrderList();
                     stage.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -274,7 +278,7 @@ public class ClientController implements Initializable {
 
 
         CompletableFuture.runAsync(() -> {
-            inquiryCartList();
+            //inquiryCartList();
 
 
             Platform.runLater(() -> {
@@ -284,7 +288,8 @@ public class ClientController implements Initializable {
                     scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
                     //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                     ClientController controller = main.getController();
-                    controller.updateCartList(cartListData); // Make sure to pass the data stage.setScene(scene);
+                    //controller.updateCartList(cartListData); // Make sure to pass the data stage.setScene(scene);
+                    controller.inquiryCartList();
                     stage.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -460,11 +465,13 @@ public class ClientController implements Initializable {
 //
             Region spacer1 = new Region();
             Region spacer2 = new Region();
+            spacer2.setMinWidth(10);
             HBox.setHgrow(spacer1, Priority.ALWAYS);
-            HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+            //HBox.setHgrow(spacer2, Priority.ALWAYS);
 
             HBox hbox = new HBox(70);
-            hbox.setAlignment(Pos.CENTER_LEFT);
+            //hbox.setAlignment(Pos.CENTER_LEFT);
 
             hbox.getChildren().addAll(productName, spacer1, productPrice, spacer2, productCount);
             this.getChildren().add(hbox);
@@ -495,8 +502,9 @@ public class ClientController implements Initializable {
             productPrice.setText(price + "$");
             Region spacer1 = new Region();
             Region spacer2 = new Region();
+            spacer1.setMinWidth(20);
+            spacer2.setMinWidth(80);
             HBox.setHgrow(spacer1, Priority.ALWAYS);
-            HBox.setHgrow(spacer2, Priority.ALWAYS);
             button.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -515,10 +523,7 @@ public class ClientController implements Initializable {
                     jsonToSend.put("operation", "addProductToCart");
                     jsonToSend.put("userId",  ClientApp.getUserID());
                     jsonToSend.put("product", product.toString());
-                    //System.out.println(jsonToSend);
-                    //System.out.println("przed");
                     ClientApp.controllerToClient(jsonToSend);
-                    //System.out.println("po");
                     System.out.println("Finish adding product to cart");
                 }
 
@@ -551,6 +556,7 @@ public class ClientController implements Initializable {
         Button button = new Button("Delete");
         Label productCount = new Label();
         Product item;
+        BigDecimal ProductPrice;
         private final int productId;
         private int count = 0;
 
@@ -561,15 +567,17 @@ public class ClientController implements Initializable {
             this.count = count;
 
             productName.setText(product.getName());
-            BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
-            productPrice.setText(price + "$");
-            productCount.setText(String.valueOf(count));
+            ProductPrice = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
+            productPrice.setText(ProductPrice + "$");
+            productCount.setText("Count: " + count);
             Region spacer1 = new Region();
             Region spacer2 = new Region();
             Region spacer3 = new Region();
+            spacer2.setMinWidth(100);
+            spacer3.setMinWidth(80);
             HBox.setHgrow(spacer1, Priority.ALWAYS);
-            HBox.setHgrow(spacer2, Priority.ALWAYS);
-            HBox.setHgrow(spacer3, Priority.ALWAYS);
+            //HBox.setHgrow(spacer2, Priority.ALWAYS);
+            //HBox.setHgrow(spacer3, Priority.ALWAYS);
             button.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -578,8 +586,6 @@ public class ClientController implements Initializable {
 
                     JSONObject productId = new JSONObject();
                     productId.put("id", item.getId());
-                    //product.put("name", item.getName());
-                    //product.put("price", item.getPrice());
 
 
                     JSONObject jsonToSend = new JSONObject();
@@ -587,14 +593,10 @@ public class ClientController implements Initializable {
                     jsonToSend.put("operation", "deleteProductFromCart");
                     jsonToSend.put("userId", ClientApp.getUserID());
                     jsonToSend.put("productId", productId.toString());
-                    //System.out.println(jsonToSend);
-                    //System.out.println("przed");
                     ClientApp.controllerToClient(jsonToSend);
-                    //System.out.println("po");
 
                     while (true) {
                         if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
-                            //System.out.println("DZIALA");
                             try {
                                 switchSceneToCartViev(event);
                             } catch (IOException e) {
@@ -615,13 +617,10 @@ public class ClientController implements Initializable {
             this.getChildren().addAll(productName, spacer1, productPrice, spacer2, productCount, spacer3, button);
         }
 
-        public int getProductId() {
-            return productId;
+        public BigDecimal getPrice() {
+            return ProductPrice;
         }
 
-        public void setCount(int count) {
-            this.count = count;
-        }
 
         public int getCount() {
             return count;
@@ -806,6 +805,15 @@ public class ClientController implements Initializable {
             }
 
             cartList.setItems(cartListData);
+            BigDecimal productsSum= BigDecimal.valueOf(0);
+
+            for(ProductCartFX item : cartListData) {
+
+                productsSum = productsSum.add(BigDecimal.valueOf(item.getCount()).multiply(item.getPrice()));
+            }
+            System.out.println("Sum of products: " + productsSum);
+            cartListSum.setText("Sum: " + productsSum + "$");
+
 
         } else {
             System.out.println("Cart is empty");
