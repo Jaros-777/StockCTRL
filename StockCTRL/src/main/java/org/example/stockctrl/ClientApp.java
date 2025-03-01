@@ -19,10 +19,8 @@ import java.util.Scanner;
 public class ClientApp extends Application {
 
 
-    private static Socket socket;
     private static boolean isClientRunning = true;
     private static JSONObject infoJson = new JSONObject();
-    //private static JSONObject controllerInfo = new JSONObject();
 
     public static void controllerToClient(JSONObject json) {
         infoJson = json;
@@ -51,7 +49,6 @@ public class ClientApp extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/icon-warehouse.png")));
         stage.getIcons().add(image);
-        //System.out.println(getClass().getResource("/styling.css"));
         scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
 
         stage.setTitle("StockCTRL Client");
@@ -74,7 +71,6 @@ public class ClientApp extends Application {
             Socket socket = new Socket("localhost", 8080);
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            //Scanner scanner = new Scanner(System.in);
 
             System.out.println("-- Client " + socket.getInetAddress() + " connected with server --");
 
@@ -116,16 +112,6 @@ public class ClientApp extends Application {
                     }
                 }
 
-//                System.out.println("Podaj liczbe ");
-//                int n = scanner.nextInt();
-//                JSONObject json = new JSONObject();
-//                json.put("Number", n);
-//                bw.write(json.toString());
-//                bw.newLine();
-//                bw.flush();
-//                String odp = br.readLine();
-//                JSONObject odpJson = new JSONObject(odp);
-//                System.out.println(odpJson.optBoolean("Odp"));
 
             }
 
@@ -171,8 +157,6 @@ public class ClientApp extends Application {
     }
     public static void checkLogin(BufferedWriter bw, BufferedReader br) {
 
-//        JSONObject jsonToSend = new JSONObject();
-//        jsonToSend.put("operation", infoJson.optString("operation"));
 
         System.out.println("Client send data to server: " + infoJson);
 
@@ -207,8 +191,6 @@ public class ClientApp extends Application {
     }
     public static void sendToServerInquiryOrdersList(BufferedWriter bw, BufferedReader br) {
 
-//        JSONObject jsonToSend = new JSONObject();
-//        jsonToSend.put("operation", infoJson.optString("operation"));
 
         System.out.println("Client send data to server: " + infoJson);
 
@@ -225,13 +207,11 @@ public class ClientApp extends Application {
 
 
             try {
-//                    System.out.println("I waiting to order a data from server");
                 String data = br.readLine();
                 JSONObject answer = new JSONObject(data);
 
                 if(Objects.equals(answer.optString("toSend"), "false")){
                     infoJson = new JSONObject(data);
-//                        System.out.println("I order a data from server: "+ infoJson);
 
                     run = false;
                 }
@@ -243,7 +223,6 @@ public class ClientApp extends Application {
         }
 
 
-//        infoJson.put("toSend", false);
     }
     public static void deleteCartList(BufferedWriter bw, BufferedReader br) {
 
@@ -291,13 +270,11 @@ public class ClientApp extends Application {
 
 
             try {
-//                    System.out.println("I waiting to order a data from server");
                 String data = br.readLine();
                 JSONObject answer = new JSONObject(data);
 
                 if(Objects.equals(answer.optString("toSend"), "false")){
                     infoJson = new JSONObject(data);
-//                        System.out.println("I order a data from server: "+ infoJson);
 
                     break;
                 }
@@ -308,7 +285,6 @@ public class ClientApp extends Application {
 
         }
 
-        //infoJson.put("toSend", false);
     }
 
     public static void sendToServerUpdateCart(BufferedWriter bw) {
@@ -369,8 +345,6 @@ public class ClientApp extends Application {
 
     public static void giveUserDetails(BufferedWriter bw, BufferedReader br) {
 
-//        JSONObject jsonToSend = new JSONObject();
-//        jsonToSend.put("operation", infoJson.optString("operation"));
 
         System.out.println("Client send data to server: " + infoJson);
 
@@ -421,8 +395,6 @@ public class ClientApp extends Application {
 
     public static void sendToServerInquiryCartList(BufferedWriter bw, BufferedReader br) {
 
-//        JSONObject jsonToSend = new JSONObject();
-//        jsonToSend.put("operation", infoJson.optString("operation"));
 
         System.out.println("Client send data to server: " + infoJson);
 
@@ -439,13 +411,11 @@ public class ClientApp extends Application {
 
 
             try {
-//                    System.out.println("I waiting to order a data from server");
                 String data = br.readLine();
                 JSONObject answer = new JSONObject(data);
 
                 if(Objects.equals(answer.optString("toSend"), "false")){
                     infoJson = new JSONObject(data);
-//                        System.out.println("I order a data from server: "+ infoJson);
 
                     run = false;
                 }
@@ -457,13 +427,10 @@ public class ClientApp extends Application {
         }
 
 
-//        infoJson.put("toSend", false);
     }
 
     public static void sendToServerInquiryProductsList(BufferedWriter bw, BufferedReader br) {
 
-//        JSONObject jsonToSend = new JSONObject();
-//        jsonToSend.put("operation", infoJson.optString("operation"));
 
         System.out.println("Client send data to server: " + infoJson);
 
@@ -480,13 +447,11 @@ public class ClientApp extends Application {
 
 
                 try {
-//                    System.out.println("I waiting to order a data from server");
                     String data = br.readLine();
                     JSONObject answer = new JSONObject(data);
 
                     if(Objects.equals(answer.optString("toSend"), "false")){
                         infoJson = new JSONObject(data);
-//                        System.out.println("I order a data from server: "+ infoJson);
 
                         run = false;
                     }
@@ -498,7 +463,6 @@ public class ClientApp extends Application {
         }
 
 
-//        infoJson.put("toSend", false);
     }
 
 

@@ -52,8 +52,6 @@ public class ClientController implements Initializable {
     private TextField registerUserPassword;
 
     @FXML
-    private Button cartBtn = new Button("Cart (0)");
-    @FXML
     private Label cartListSum = new Label();
     @FXML
     private ListView<ProductFX> productsList = new ListView<>();
@@ -70,7 +68,7 @@ public class ClientController implements Initializable {
     public void switchSceneToMainViev(ActionEvent event) throws IOException {
         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("main-view.fxml"));
         Scene scene = new Scene(main.load());
-        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
 
@@ -79,7 +77,7 @@ public class ClientController implements Initializable {
     public void switchSceneToRegistrationViev(ActionEvent event) throws IOException {
         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("register-view.fxml"));
         Scene scene = new Scene(main.load());
-        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
 
@@ -88,7 +86,7 @@ public class ClientController implements Initializable {
     public void switchSceneToRegistrationVievREGISTER(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
-        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        waitingScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
@@ -99,7 +97,7 @@ public class ClientController implements Initializable {
                     try {
                         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
                         Scene scene = new Scene(main.load());
-                        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
                         stage.setScene(scene);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -115,7 +113,7 @@ public class ClientController implements Initializable {
     public void switchSceneToMainVievLOGIN(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
-        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        waitingScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
@@ -127,7 +125,7 @@ public class ClientController implements Initializable {
                     try {
                         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("main-view.fxml"));
                         Scene scene = new Scene(main.load());
-                        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+                        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
                         stage.setScene(scene);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -160,7 +158,7 @@ public class ClientController implements Initializable {
     public void switchSceneToStartViev(ActionEvent event) throws IOException {
         FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("start-view.fxml"));
         Scene scene = new Scene(main.load());
-        scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(scene);
 
@@ -171,23 +169,20 @@ public class ClientController implements Initializable {
     public void switchSceneToProductViev(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
-        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        waitingScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
 
         CompletableFuture.runAsync(() -> {
-            //inquiryProductsList();
 
 
             Platform.runLater(() -> {
                 try {
                     FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("products-view.fxml"));
                     Scene scene = new Scene(main.load());
-                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
-                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
                     ClientController controller = main.getController();
-                    //controller.updateProductsList(productsListData); // Make sure to pass the data stage.setScene(scene);
                     controller.inquiryProductsList();
                     stage.setScene(scene);
                 } catch (IOException e) {
@@ -198,33 +193,23 @@ public class ClientController implements Initializable {
 
     }
 
-    public void updateProductsList(ObservableList<ProductFX> products) {
-        productsListData.clear();
-        productsListData.addAll(products);
-        productsList.setItems(productsListData);
-    }
-
     @FXML
     public void switchSceneToOrderViev(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
-        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        waitingScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
 
         CompletableFuture.runAsync(() -> {
-            //inquiryOrderList();
-
 
             Platform.runLater(() -> {
                 try {
                     FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("order-view.fxml"));
                     Scene scene = new Scene(main.load());
-                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
-                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
                     ClientController controller = main.getController();
-                    //controller.updateOrderList(orderListData); // Make sure to pass the data stage.setScene(scene);
                     controller.inquiryOrderList();
                     stage.setScene(scene);
                 } catch (IOException e) {
@@ -234,17 +219,11 @@ public class ClientController implements Initializable {
         });
     }
 
-    public void updateOrderList(ObservableList<OrderFX> products) {
-        orderListData.clear();
-        orderListData.addAll(products);
-        orderList.setItems(orderListData);
-    }
-
     @FXML
     public void switchSceneToSettingsViev(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
-        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        waitingScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
@@ -256,10 +235,9 @@ public class ClientController implements Initializable {
                 try {
                     FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("settings-view.fxml"));
                     Scene scene = new Scene(main.load());
-                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
-                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
                     ClientController controller = main.getController();
-                    controller.loadUserDetails(); // Make sure to pass the data stage.setScene(scene);
+                    controller.loadUserDetails();
                     stage.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -272,23 +250,19 @@ public class ClientController implements Initializable {
     public void switchSceneToCartViev(ActionEvent event) throws IOException {
         FXMLLoader waitingLoader = new FXMLLoader(ClientApp.class.getResource("waiting-view.fxml"));
         Scene waitingScene = new Scene(waitingLoader.load());
-        waitingScene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
+        waitingScene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(waitingScene);
 
 
         CompletableFuture.runAsync(() -> {
-            //inquiryCartList();
-
 
             Platform.runLater(() -> {
                 try {
                     FXMLLoader main = new FXMLLoader(ClientApp.class.getResource("cart-view.fxml"));
                     Scene scene = new Scene(main.load());
-                    scene.getStylesheets().add(getClass().getResource("/styling.css").toExternalForm());
-                    //stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+                    scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styling.css")).toExternalForm());
                     ClientController controller = main.getController();
-                    //controller.updateCartList(cartListData); // Make sure to pass the data stage.setScene(scene);
                     controller.inquiryCartList();
                     stage.setScene(scene);
                 } catch (IOException e) {
@@ -300,12 +274,6 @@ public class ClientController implements Initializable {
 
     }
 
-    public void updateCartList(ObservableList<ProductCartFX> products) {
-        cartListData.clear();
-        cartListData.addAll(products);
-        cartList.setItems(cartListData);
-        //System.out.println("Updated ListView with cartlist: " + cartList.getItems());
-    }
 
 
     //LOGIC
@@ -349,7 +317,6 @@ public class ClientController implements Initializable {
 
                     while (true) {
                         if (Objects.equals(ClientApp.ClientToController().optString("toSend"), "false")) {
-                            //System.out.println("DZIALA");
                             try {
                                 switchSceneToCartViev(event);
                             } catch (IOException e) {
@@ -408,44 +375,40 @@ public class ClientController implements Initializable {
 
         jsonToSend.put("userDetails", userDetails);
 
-        //System.out.println("Controller test: "+ jsonToSend);
-
         ClientApp.controllerToClient(jsonToSend);
     }
 
-    public class OrderFX extends HBox {
+    public static class OrderFX extends HBox {
         Label productName = new Label();
         Label productPrice = new Label();
         Label productCount = new Label();
         List<Product> orderList;
-        private int orderId;
 
         OrderFX(List<Product> orderList, int id, String status) {
             super();
             this.orderList = orderList;
-            this.orderId = id;
 
             StringBuilder productNameText = new StringBuilder();
             StringBuilder productPriceText = new StringBuilder();
             StringBuilder productCountText = new StringBuilder();
 
             productNameText.append("Order ID: \n");
-            productPriceText.append(id + "\n");
+            productPriceText.append(id).append("\n");
             productCountText.append("\n");
 
             productNameText.append("Current status: \n \n");
-            productPriceText.append(status + "\n \n");
+            productPriceText.append(status).append("\n \n");
             productCountText.append("\n \n");
 
             productNameText.append("Products name \n");
             productPriceText.append("Price \n");
             productCountText.append("Count \n");
-            for (int i = 0; i < orderList.size(); i++) {
-                productNameText.append(orderList.get(i).getName());
+            for (Product product : orderList) {
+                productNameText.append(product.getName());
                 productNameText.append("\n");
-                productPriceText.append(BigDecimal.valueOf(orderList.get(i).getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP) + "$");
+                productPriceText.append(BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP)).append("$");
                 productPriceText.append("\n");
-                productCountText.append(orderList.get(i).getCount());
+                productCountText.append(product.getCount());
                 productCountText.append("\n");
 
 
@@ -458,44 +421,28 @@ public class ClientController implements Initializable {
             productCount.setText(String.valueOf(productCountText));
 
 
-//            productName.setText(product.getName());
-//            BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
-//            productPrice.setText(price +"$");
-//            productCount.setText(String.valueOf(product.getCount()));
-//
+
             Region spacer1 = new Region();
             Region spacer2 = new Region();
-            spacer2.setMinWidth(10);
+            spacer2.setMinWidth(100);
             HBox.setHgrow(spacer1, Priority.ALWAYS);
 
-            //HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-            HBox hbox = new HBox(70);
-            //hbox.setAlignment(Pos.CENTER_LEFT);
-
-            hbox.getChildren().addAll(productName, spacer1, productPrice, spacer2, productCount);
-            this.getChildren().add(hbox);
+            this.getChildren().addAll(productName, spacer1, productPrice, spacer2, productCount);
         }
 
 
-//        public String toString(){
-//            return item + " count: " + count;
-//        }
 
     }
 
-    public class ProductFX extends HBox {
+    public static class ProductFX extends HBox {
         Label productName = new Label();
         Label productPrice = new Label();
         Button button = new Button("Add to cart");
         Product item;
-        private final int productId;
-        private int count = 0;
 
         ProductFX(Product product) {
             super();
             item = product;
-            this.productId = product.getId();
 
             productName.setText(product.getName());
             BigDecimal price = BigDecimal.valueOf(product.getPrice() * 0.24).setScale(2, RoundingMode.HALF_UP);
@@ -511,7 +458,6 @@ public class ClientController implements Initializable {
                 public void handle(ActionEvent event) {
                     System.out.println("Start adding product to cart");
 
-                    //{"product":{"price":2999,"name":"Iphone 13 PRO MAX","id":1},"count":1}
                     JSONObject product = new JSONObject();
                     product.put("id", item.getId());
                     product.put("name", item.getName());
@@ -532,19 +478,9 @@ public class ClientController implements Initializable {
             this.getChildren().addAll(productName, spacer1, productPrice, spacer2, button);
         }
 
-        public int getProductId() {
-            return productId;
-        }
-
-        public void setCount(int count) {
-            this.count = count;
-        }
-
-        public int getCount() {
-            return count;
-        }
 
         public String toString() {
+            int count = 0;
             return item + " count: " + count;
         }
 
@@ -557,13 +493,11 @@ public class ClientController implements Initializable {
         Label productCount = new Label();
         Product item;
         BigDecimal ProductPrice;
-        private final int productId;
-        private int count = 0;
+        private final int count;
 
         ProductCartFX(Product product, int count) {
             super();
             item = product;
-            this.productId = product.getId();
             this.count = count;
 
             productName.setText(product.getName());
@@ -576,8 +510,6 @@ public class ClientController implements Initializable {
             spacer2.setMinWidth(100);
             spacer3.setMinWidth(80);
             HBox.setHgrow(spacer1, Priority.ALWAYS);
-            //HBox.setHgrow(spacer2, Priority.ALWAYS);
-            //HBox.setHgrow(spacer3, Priority.ALWAYS);
             button.setOnAction(new EventHandler<ActionEvent>() {
 
                 @Override
@@ -661,7 +593,6 @@ public class ClientController implements Initializable {
 
             }
         }
-
 
     }
     private void checkLogin() {
@@ -753,7 +684,6 @@ public class ClientController implements Initializable {
         } else {
             System.out.println("You don't have any orders yet");
         }
-        //System.out.println(orderList);
         System.out.println("Finished downloading order from server");
 
 
@@ -766,7 +696,6 @@ public class ClientController implements Initializable {
         jsonToSend.put("operation", "giveCartList");
         jsonToSend.put("userId", String.valueOf( ClientApp.getUserID()));
         ClientApp.controllerToClient(jsonToSend);
-        //System.out.println("Json sended");
 
 
         String orderedCartList = "";
@@ -786,13 +715,10 @@ public class ClientController implements Initializable {
 
             for (int i = 0; i < orderedCartJson.length(); i++) {
                 JSONObject currentProductFromCart = orderedCartJson.getJSONObject(i);
-                //System.out.println(currentProductFromCart);
 
                 int count = (int) currentProductFromCart.get("count");
-                //System.out.println("Count: "+ count);
 
                 JSONObject jsonProduct = (JSONObject) currentProductFromCart.get("product");
-                //System.out.println("Product: " +product);
                 String name = (String) jsonProduct.get("name");
                 int price = (int) jsonProduct.get("price");
                 int id = (int) jsonProduct.get("id");
