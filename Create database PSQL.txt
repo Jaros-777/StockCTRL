@@ -31,3 +31,5 @@ CREATE TABLE users
     order json,
     CONSTRAINT users_pkey PRIMARY KEY (id)
 )
+
+CREATE USER your_username WITH PASSWORD 'your_password';
